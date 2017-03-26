@@ -1,0 +1,31 @@
+#-------------------------------------------------
+#
+# Project created by QtCreator 2017-03-21T14:37:35
+#
+#-------------------------------------------------
+
+QT       -= gui
+QT       += widgets network sql
+
+TARGET = ilong
+TEMPLATE = lib
+DESTDIR = ../bin
+DEFINES += ILONG_LIBRARY
+
+SOURCES += ILong.cpp \
+    Map.cpp \
+    Network.cpp \
+    ILoveChina.cpp \
+    SQLExcute.cpp
+
+HEADERS += ILong.h\
+        ilong_global.h \
+    Map.h \
+    Network.h \
+    ILoveChina.h \
+    SQLExcute.h
+
+unix {
+    target.path = /usr/lib
+    INSTALLS += target
+}
