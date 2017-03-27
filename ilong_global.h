@@ -27,4 +27,15 @@ typedef struct
     int z;
 } TPoint;
 
+typedef enum
+{
+    ILongNUMBER,
+    ILongTEXT,
+} ILongType;
+
+typedef struct
+{
+    QString name;
+    ILongType type;
+} LayerFormat;
 #endif // ILONG_GLOBAL_H

@@ -14,12 +14,18 @@
 #include "Network.h"
 #include "ILoveChina.h"
 #include "SQLExcute.h"
+#include "Manager.h"
+#include "Layer.h"
 
 class Network;
+class Manager;
 class ILONGSHARED_EXPORT ILong : public QGraphicsView
 {
     Q_OBJECT
 public:
+    friend class Manager;
+    friend class Layer;
+    friend class Network;
     ILong(QWidget *parent);
     ~ILong();
     quint8 maxZoomLevel();
@@ -30,9 +36,10 @@ public:
     void setDefaultLocation(QPointF worldCoordinate, quint8 zoomLevel);
     QList <QString> * getImageList();
     QString getServer();
-    QPoint getMiddlePos();
-    QPoint getTopLeftPos();
-    QPixmap * getBackground();
+    //图层管理
+    QList<Layer *> getLayers() const;
+    Layer *addLayer(QString name, QList<LayerFormat> *typeList) const;
+    void removeLayer(QString name);
 protected:
     bool viewportEvent(QEvent *event);
     void drawBackground(QPainter *p, const QRectF &rect);
@@ -69,6 +76,7 @@ private:
     QPoint backgroundPos;
     QPoint middle, leftTop;
     Network * net;
+    Manager * manager;
     QList <QString> list;//path,server
     QThread  networkThread;
     SQLExcute sqlExcute;

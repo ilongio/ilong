@@ -94,13 +94,13 @@ void Network::requestFinished(QNetworkReply *reply)
             //(x+leftTiles-middleX)*DEFAULTTILESIZE,(y+topTiles-middleY)*DEFAULTTILESIZE
             if(t.z == iLong->zoomLevel())
             {
-                QPoint middle = iLong->getMiddlePos();
-                QPoint leftTop = iLong->getTopLeftPos();
+                QPoint middle = iLong->middle;
+                QPoint leftTop = iLong->leftTop;
                 int x = (t.x+leftTop.x()-middle.x())*DEFAULTTILESIZE;
                 int y = (t.y+leftTop.y()-middle.y())*DEFAULTTILESIZE;
-                if(x>=0 && x<iLong->getBackground()->width() && y >=0 && y < iLong->getBackground()->height())
+                if(x>=0 && x<iLong->background.width() && y >=0 && y < iLong->background.height())
                 {
-                    QPainter p(iLong->getBackground());
+                    QPainter p(&iLong->background);
                     p.drawPixmap(x,y,DEFAULTTILESIZE,DEFAULTTILESIZE,pm);
                     p.end();
                     emit newImage();

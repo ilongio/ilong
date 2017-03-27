@@ -3,11 +3,12 @@
 
 ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     currentLevel(DEFAULTZOOMLEVEL),numberOfTiles(tilesOnZoomLevel(currentLevel)),
-    defaultLocation(DEFAULTLOCATION),net(new Network(this)),tilesCount(0),
-    currentPos(DEFAULTLOCATION)
+    defaultLocation(DEFAULTLOCATION),net(new Network(this)),
+    tilesCount(0),currentPos(DEFAULTLOCATION)
 {
     setStyleSheet("background-color:lightGray");
     setScene(new QGraphicsScene(this));
+    manager = new Manager(this);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy (Qt::ScrollBarAlwaysOff );
     setViewportUpdateMode(FullViewportUpdate);
@@ -19,6 +20,16 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     connect(net,SIGNAL(newImage()),this,SLOT(newImage()));
     connect(net,SIGNAL(sendTileCount(int)),this, SLOT(updateTilesCount(int)));
     connect(this,SIGNAL(sendLocationPos(QPointF)),this,SLOT(updateLocationPos(QPointF)));
+    QList<LayerFormat> xlist;
+    LayerFormat f1;
+    f1.name = "id";
+    f1.type = ILongNUMBER;
+    LayerFormat f2;
+    f2.name = "name";
+    f2.type = ILongTEXT;
+    xlist.append(f1);
+    xlist.append(f2);
+    manager->addLayer("xxx", &xlist);
 }
 
 ILong::~ILong()
@@ -85,19 +96,21 @@ QString ILong::getServer()
     return map.getServer();
 }
 
-QPoint ILong::getMiddlePos()
+QList<Layer *> ILong::getLayers() const
 {
-    return middle;
+    return manager->getLayers();
 }
 
-QPoint ILong::getTopLeftPos()
+Layer *ILong::addLayer(QString name, QList<LayerFormat> *typeList) const
 {
-    return leftTop;
+    if(!typeList->size())
+        return nullptr;
+    return manager->addLayer(name,typeList);
 }
 
-QPixmap *ILong::getBackground()
+void ILong::removeLayer(QString name)
 {
-    return &background;
+    manager->removeLayer(name);
 }
 
 bool ILong::viewportEvent(QEvent *event)

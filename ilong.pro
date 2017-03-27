@@ -16,14 +16,18 @@ SOURCES += ILong.cpp \
     Map.cpp \
     Network.cpp \
     ILoveChina.cpp \
-    SQLExcute.cpp
+    SQLExcute.cpp \
+    Manager.cpp \
+    Layer.cpp
 
 HEADERS += ILong.h\
         ilong_global.h \
     Map.h \
     Network.h \
     ILoveChina.h \
-    SQLExcute.h
+    SQLExcute.h \
+    Manager.h \
+    Layer.h
 
 unix {
     target.path = /usr/lib
