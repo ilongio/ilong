@@ -3,14 +3,13 @@
 
 ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     currentLevel(DEFAULTZOOMLEVEL),numberOfTiles(tilesOnZoomLevel(currentLevel)),
-    defaultLocation(DEFAULTLOCATION),net(new Network(this))
+    defaultLocation(DEFAULTLOCATION),net(new Network(this)),tilesCount(0),
+    currentPos(DEFAULTLOCATION)
 {
+    setStyleSheet("background-color:lightGray");
     setScene(new QGraphicsScene(this));
-    //setMouseTracking(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy (Qt::ScrollBarAlwaysOff );
-    //setTransformationAnchor(AnchorUnderMouse);
-    //setDragMode(ScrollHandDrag);
     setViewportUpdateMode(FullViewportUpdate);
     centerOn(0,0);
     setSceneRect(viewport()->rect());
@@ -18,6 +17,8 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     net->moveToThread(&networkThread);
     connect(this,SIGNAL(downloadImage()),net,SLOT(start()));
     connect(net,SIGNAL(newImage()),this,SLOT(newImage()));
+    connect(net,SIGNAL(sendTileCount(int)),this, SLOT(updateTilesCount(int)));
+    connect(this,SIGNAL(sendLocationPos(QPointF)),this,SLOT(updateLocationPos(QPointF)));
 }
 
 ILong::~ILong()
@@ -126,6 +127,7 @@ bool ILong::viewportEvent(QEvent *event)
     case QEvent::MouseMove:
     {
         QMouseEvent * moveEvent = static_cast<QMouseEvent *>(event);
+        emit sendLocationPos(sceneToWorld(mapToScene(moveEvent->pos())));
         if(moveEvent->buttons() & Qt::LeftButton)
         {
 
@@ -165,6 +167,27 @@ void ILong::drawBackground(QPainter *p, const QRectF &rect)
     p->resetTransform();
     p->drawPixmap(backgroundPos,background);
     p->restore();
+}
+
+void ILong::drawForeground(QPainter *painter, const QRectF &rect)
+{
+    Q_UNUSED(rect);
+    painter->save();
+    painter->resetTransform();
+    painter->setPen(QColor(Qt::red));
+    QPoint p = viewport()->rect().center();
+    painter->drawLine(p-QPoint(10,0), p+QPoint(10,0));
+    painter->drawLine(p-QPoint(0,10), p+QPoint(0,10));
+    QFont font = painter->font();
+    font.setBold(true);
+    painter->setFont(font);
+    painter->setPen(QColor(Qt::yellow));
+    painter->drawText(QPoint(0,10),QString("Lng: %1").arg(currentPos.x(),0,'g',10));
+    painter->drawText(QPoint(0,25),QString("Lat: %1").arg(currentPos.y(),0,'g',10));
+    painter->drawText(QPoint(0,40),QString("Tile: %1").arg(tilesCount));
+    painter->drawText(QPoint(0,55),QString("Level: %1").arg(currentLevel));
+
+    painter->restore();
 }
 
 void ILong::resizeEvent(QResizeEvent *event)
@@ -213,35 +236,32 @@ void ILong::tilesUrlMatrix()
     int bottomTiles = rightBottomDelta.y() / DEFAULTTILESIZE + 1;
     background = QPixmap((leftTop.x() + rightTiles + 1) * DEFAULTTILESIZE,
                          (leftTop.y() + bottomTiles + 1) * DEFAULTTILESIZE);
-    background.fill(QColor(Qt::black));
+    background.fill(QColor(Qt::lightGray));
     backgroundPos = mapFromScene((-leftTop.x()+middle.x())*DEFAULTTILESIZE,
                                  (-leftTop.y()+middle.y())*DEFAULTTILESIZE);
-    QList<QString> newList;
-    QString sql = "SELECT * FROM ILONGIO WHERE ";
-    for(int y=leftTop.y()+middle.y(); y>=-bottomTiles+middle.y(); y--)
+    QMultiMap<int, int> tList;
+    for(int x=-leftTop.x()+middle.x(); x<=rightTiles+middle.x(); x++)
     {
-        for(int x=leftTop.x()+middle.x(); x>=-rightTiles+middle.x(); x--)
+        for(int y=-leftTop.y()+middle.y(); y<=bottomTiles+middle.y(); y++)
         {
             if(map.isTileValid(x,y,currentLevel))
             {
-                QString serverPath = map.queryTile(x,y,currentLevel);
-                newList.append(serverPath);
-                QString tmp = QString(" ( X = %1 AND Y = %2 AND Z = %3 ) OR ").arg(x).arg(y).arg(currentLevel);
-                sql.append(tmp);
+                tList.insertMulti(x,y);
             }
 
         }
     }
-    sql = sql.left(sql.length() - 3);
-    QSqlQuery * query = sqlExcute.checkImage(sql);
+    QSqlQuery * query = sqlExcute.checkImage(leftTop.x()+middle.x(), -rightTiles+middle.x(),
+                                             leftTop.y()+middle.y(), -bottomTiles+middle.y(), currentLevel);
     bool checkImageError = false;
     if(query == nullptr)
     {
-        while(!newList.isEmpty())
+        while(!tList.isEmpty())
         {
-            QString path = newList.first();
+            int key = tList.firstKey();
+            QString path = map.queryTile(key,tList.first(),currentLevel);
             list.contains(path) ? list.move(list.indexOf(path),0) : list.insert(0,path);
-            newList.removeFirst();
+            tList.remove(key,tList.first());
         }
         checkImageError = true;
     }
@@ -249,8 +269,7 @@ void ILong::tilesUrlMatrix()
     {
         int x = query->value(0).toInt();
         int y = query->value(1).toInt();
-        int z = query->value(2).toInt();
-        QString path = map.queryTile(x, y, z);
+        //int z = query->value(2).toInt();
         QPixmap pm;
         pm.loadFromData(query->value(3).toByteArray());
         QPainter painter(&background);
@@ -258,18 +277,20 @@ void ILong::tilesUrlMatrix()
                            ,(y+leftTop.y()-middle.y())*DEFAULTTILESIZE
                            ,DEFAULTTILESIZE,DEFAULTTILESIZE,pm);
         painter.end();
-        newList.removeOne(path);
+        tList.remove(x,y);
     }
     if(query)
     {
         delete query;
         query = 0;
     }
-    while(!newList.isEmpty() && !checkImageError)
+    while(!tList.isEmpty() && !checkImageError)
     {
-        QString path = newList.first();
+        int key = tList.firstKey();
+        int value = tList.first();
+        QString path = map.queryTile(key, value, currentLevel);
         list.contains(path) ? list.move(list.indexOf(path),0) : list.insert(0,path);
-        newList.removeFirst();
+        tList.remove(key, value);
     }
     if(!networkThread.isRunning())
         networkThread.start();
@@ -323,16 +344,29 @@ void ILong::viewChangedSlot()
     QGraphicsTextItem * tx = new QGraphicsTextItem("mmmm");
     tx->setPos(worldToScene(QPointF(99.80875,27.72188)));
     tx->setScale(itemScale);
+    tx->setDefaultTextColor(QColor(Qt::green));
     scene()->addItem(tx);
-    QGraphicsTextItem * px = new QGraphicsTextItem("center");
-    px->setDefaultTextColor(QColor(Qt::red));
-    px->setPos(worldToScene(defaultLocation));
-    px->setScale(itemScale);
-    scene()->addItem(px);
+//    QGraphicsTextItem * px = new QGraphicsTextItem("center");
+//    px->setDefaultTextColor(QColor(Qt::red));
+//    px->setPos(worldToScene(defaultLocation));
+//    px->setScale(itemScale);
+//    scene()->addItem(px);
 }
 
 void ILong::newImage()
 {
+    viewport()->update();
+}
+
+void ILong::updateTilesCount(int count)
+{
+    tilesCount = count;
+    viewport()->update();
+}
+
+void ILong::updateLocationPos(QPointF world)
+{
+    currentPos = world;
     viewport()->update();
 }
 

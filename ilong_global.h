@@ -4,6 +4,7 @@
 #include <QtCore/qglobal.h>
 #include <QDir>
 
+
 #if defined(ILONG_LIBRARY)
 #  define ILONGSHARED_EXPORT Q_DECL_EXPORT
 #else
@@ -18,5 +19,12 @@
 #define MINZOOMLEVEL 1
 #define DEFAULTLOCATION QPointF(0,0)
 #define CONFIGPATH QDir::homePath() + "/.ilong.io/"
+
+typedef struct
+{
+    int x;
+    int y;
+    int z;
+} TPoint;
 
 #endif // ILONG_GLOBAL_H

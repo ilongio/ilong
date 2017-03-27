@@ -15,7 +15,7 @@ class SQLExcute : public QObject
     Q_OBJECT
 public:
     explicit SQLExcute(QObject *parent = 0);
-    QSqlQuery * checkImage(QString sql);
+    QSqlQuery * checkImage(int maxX, int minX, int maxY, int minY, int z);
     void insertImage(int x, int y, int z, QByteArray ax);
 private:
 

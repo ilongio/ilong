@@ -36,6 +36,7 @@ public:
 protected:
     bool viewportEvent(QEvent *event);
     void drawBackground(QPainter *p, const QRectF &rect);
+    void drawForeground(QPainter *painter, const QRectF &rect);
     void resizeEvent(QResizeEvent *event);
 private:
     QPointF worldToScene(QPointF world);
@@ -71,12 +72,19 @@ private:
     QList <QString> list;//path,server
     QThread  networkThread;
     SQLExcute sqlExcute;
+
+    int tilesCount;
+    QPointF currentPos;
+
 signals:
     void viewChangedSignal();
     void downloadImage();
+    void sendLocationPos(QPointF);
 public slots:
     void viewChangedSlot();
     void newImage();
+    void updateTilesCount(int count);
+    void updateLocationPos(QPointF world);
 };
 
 #endif // ILONG_H

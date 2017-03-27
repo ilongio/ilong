@@ -10,18 +10,12 @@
 #include "ILong.h"
 #include "SQLExcute.h"
 
+
 class ILong;
 class Network : public QObject
 {
     Q_OBJECT
 public:
-    typedef struct
-    {
-        int x;
-        int y;
-        int z;
-    } TPoint;
-
     explicit Network(ILong *iL , QObject * parent = 0);
     ~Network();
     bool getDownloadState();

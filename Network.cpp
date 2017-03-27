@@ -36,7 +36,7 @@ QString Network::getUrl(QString host, QString path)
     return QString("http://%1:%2%3").arg(hostName).arg(portNumber).arg(path);
 }
 
-Network::TPoint Network::getXYZFromUrl(QString Url)
+TPoint Network::getXYZFromUrl(QString Url)
 {
     int xoffset = Url.indexOf("x=");
     int yoffset = Url.indexOf("y=");
@@ -94,14 +94,17 @@ void Network::requestFinished(QNetworkReply *reply)
             //(x+leftTiles-middleX)*DEFAULTTILESIZE,(y+topTiles-middleY)*DEFAULTTILESIZE
             if(t.z == iLong->zoomLevel())
             {
-                QPainter p(iLong->getBackground());
                 QPoint middle = iLong->getMiddlePos();
                 QPoint leftTop = iLong->getTopLeftPos();
-                p.drawPixmap((t.x+leftTop.x()-middle.x())*DEFAULTTILESIZE
-                             ,(t.y+leftTop.y()-middle.y())*DEFAULTTILESIZE
-                             ,DEFAULTTILESIZE,DEFAULTTILESIZE,pm);
-                p.end();
-                emit newImage();
+                int x = (t.x+leftTop.x()-middle.x())*DEFAULTTILESIZE;
+                int y = (t.y+leftTop.y()-middle.y())*DEFAULTTILESIZE;
+                if(x>=0 && x<iLong->getBackground()->width() && y >=0 && y < iLong->getBackground()->height())
+                {
+                    QPainter p(iLong->getBackground());
+                    p.drawPixmap(x,y,DEFAULTTILESIZE,DEFAULTTILESIZE,pm);
+                    p.end();
+                    emit newImage();
+                }
             }
             sqlExcute.insertImage(t.x, t.y, t.z, ax);
         }
