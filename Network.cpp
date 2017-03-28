@@ -1,7 +1,7 @@
 #include "Network.h"
 
-Network::Network(ILong *iL, QObject *parent) : QObject(parent),list(iL->getImageList()),
-    manager(new QNetworkAccessManager(this)),isDownloading(false),iLong(iL)
+Network::Network(ILong *iL, QObject *parent) : QObject(parent),list(&iL->list),
+    manager(new QNetworkAccessManager(this)),isDownloading(false),iLong(iL),sqlExcute(&iL->sqlExcute)
 {
     connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(requestFinished(QNetworkReply*)));
     connect(this,SIGNAL(startAgain()),this,SLOT(start()));
@@ -38,6 +38,9 @@ QString Network::getUrl(QString host, QString path)
 
 TPoint Network::getXYZFromUrl(QString Url)
 {
+    /*
+     * 感觉这么写很Low,但先这么用着吧
+     * */
     int xoffset = Url.indexOf("x=");
     int yoffset = Url.indexOf("y=");
     int zoffset = Url.indexOf("z=");
@@ -57,7 +60,7 @@ void Network::start()
     if(!list->isEmpty())
     {
         isDownloading = true;
-        QString fullUrl = getUrl(iLong->getServer(),list->at(0));
+        QString fullUrl = getUrl(iLong->map.getServer(),list->at(0));
         QNetworkRequest request = QNetworkRequest(QUrl(fullUrl));
         request.setRawHeader("User-Agent", "Mozilla/5.0 (PC; U; Intel; Linux; en) AppleWebKit/420+ (KHTML, like Gecko)");
         manager->get(request);
@@ -91,7 +94,9 @@ void Network::requestFinished(QNetworkReply *reply)
         if (pm.loadFromData(ax) && pm.size().width() > 1 && pm.size().height() > 1)
         {
             TPoint t = getXYZFromUrl(reply->url().toString());
-            //(x+leftTiles-middleX)*DEFAULTTILESIZE,(y+topTiles-middleY)*DEFAULTTILESIZE
+            /*
+             * 下载到的瓦片,看看是不是当前场景内,如果是就打印到场景背景图片里
+             * */
             if(t.z == iLong->zoomLevel())
             {
                 QPoint middle = iLong->middle;
@@ -106,7 +111,10 @@ void Network::requestFinished(QNetworkReply *reply)
                     emit newImage();
                 }
             }
-            sqlExcute.insertImage(t.x, t.y, t.z, ax);
+            /*
+             * 不管是不是场景里的瓦片,只要有瓦片下完都保存到数据库里,方便下次直接调用嘛是吧
+             * */
+            sqlExcute->insertImage(t.x, t.y, t.z, ax);
         }
     }
 }

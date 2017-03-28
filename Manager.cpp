@@ -50,14 +50,11 @@ QString Manager::checkLayerName(QString name)
     {
         if(list.at(i)->getLayerName() == tmp)
         {
-            tmp.append("#");
+            tmp.append("*");
             break;
         }
     }
-
-    if(name  == tmp )
-        return tmp;
-    return checkLayerName(tmp);
+    return name  == tmp ? tmp : checkLayerName(tmp);
 }
 
 void Manager::loadLayer(QString id, QString name, bool visible, bool selectable)

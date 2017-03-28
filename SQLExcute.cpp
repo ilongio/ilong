@@ -71,8 +71,17 @@ QSqlQuery *SQLExcute::checkType(QString id)
 
 void SQLExcute::initLayer(QString id, QString name, QList<LayerFormat> * typeList, QList <ILongType> * headType)
 {
+    /*
+     * 在ILONGIOLAYER建立表索引
+     * 一个图层分成两个表
+     * 一个表保存数据(数据表)
+     * 一个表保存图元信息(信息表)
+    */
     QString sql = QString("INSERT INTO ILONGIOLAYER VALUES ( '%1', '%2', '%3', '%4' )").arg(id).arg(name).arg(1).arg(1);
     nonResult(sql, "initLayer1");
+    /*
+     * 读取表数据结构 并创建表 把结构保存在字段类型headType里,方便插入图元数据使用
+     */
     QString saveSql = "";
     for(int i=0; i< typeList->size(); i++)
     {
@@ -81,8 +90,31 @@ void SQLExcute::initLayer(QString id, QString name, QList<LayerFormat> * typeLis
         saveSql += t;
     }
     saveSql = saveSql.left(saveSql.length() - 2);
-    sql = QString("CREATE TABLE '%1' ( %2 )").arg(id).arg(saveSql);
-    nonResult(sql, "initLayer2");
+    /*
+     * 创建数据表,专用保存导入的数据
+     */
+    sql = QString("CREATE TABLE '%1' (ILONGID REAL, %2 )").arg(id).arg(saveSql);
+    nonResult(sql, "initLayer create data table ");
+    /*
+     *创建信息表,专用保存图元的,应该可以直接保存图元,但是现在还不知道怎么弄,就先这样弄吧,以后再想办法改进(个人技术原因),主要信息有:
+     * @ILONGID     与数据的ID关联;
+     * @TYPE   ILongGeoType 枚举图元类型
+     * @X1     图元wgs X1 坐标
+     * @Y1     图元wgs Y1 坐标
+     * @X2     图元wgs X2 坐标 (点类图元写X1相同)
+     * @Y2     图元wgs Y2 坐标 (点类图元写X2相同) 设计两个坐标点只为了非点类图元需要计算边界问题,比如线
+     * @WIDTH  图元宽度
+     * @HEIGHT 图元高度 基本上,所有设计的图元都有宽和高,除了老鼠类图元的宽和高,现在还没想好怎么设计
+     * @LABEL  用来显示图标注的, 如果设置显示标注,就从数据表里面把标注内容填充到该字段
+     * @PEN    图元画笔RGB色 本来要直接保存画笔的,但是现在还不会,只能先保存RGB颜色了
+     * @BRUSH  图元画刷RGB色
+     * @INFO   保存图元GIS信息的,点类数据只保存一个WGS坐标点文本(99.0000,27.1234),
+     *         非点类图元保存多点WGS坐标(99.0000,27.1234_100.1234,27.1234),这个功能现在还没想好怎么处理,以后再说
+     *
+    */
+    sql =QString("CREATE TABLE %1INFO (ILONGID REAL, TYPE REAL, X1 REAL, Y1 REAL, X2 REAL, WIDTH REAL,"
+                 " HEIGHT REAL, LABEL TEXT, PEN TEXT, BRUSH TEXT, INFO TEXT)").arg(id);
+    nonResult(sql, "initLayer create info table ");
 }
 
 void SQLExcute::removeLayer(QString id)

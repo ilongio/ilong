@@ -6,17 +6,27 @@
 
 #include "ilong_global.h"
 
+/*
+ * 地图供应商管理
+ * */
+
 class Map : public QObject
 {
     Q_OBJECT
 public:
     explicit Map(QObject *parent = 0);
-    //取到地图供应商服务地址
+    /*
+     * 取到地图供应商服务地址
+     * */
     QString getServer();
     QString getPath();
-    //得到坐标点的瓦片下载地址
+    /*
+     * 得到坐标点的瓦片下载地址的path部分,如:/maps/vt?lyrs=s@701,r@701&gl=cn&x=%2&y=%3&z=%1
+     * */
     QString queryTile(int x, int y, int z);
-    //判断瓦片是否有效
+    /*
+     * 判断瓦片是否有效
+     * */
     bool isTileValid(int x, int y, int z);
 private:
     int param1;

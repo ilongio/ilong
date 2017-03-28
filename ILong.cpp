@@ -8,21 +8,33 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
 {
     setStyleSheet("background-color:lightGray");
     setScene(new QGraphicsScene(this));
+    /*
+     * @manager得在QGraphicsScene初始化之后才能使用,所以在这里初始化
+     * */
     manager = new Manager(this);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy (Qt::ScrollBarAlwaysOff );
     setViewportUpdateMode(FullViewportUpdate);
     centerOn(0,0);
     setSceneRect(viewport()->rect());
+    /*
+     * 处理刷新信号
+     * */
     connect(this,SIGNAL(viewChangedSignal()),this,SLOT(viewChangedSlot()));
     net->moveToThread(&networkThread);
+    /*
+     * 处理下载信号
+     * */
     connect(this,SIGNAL(downloadImage()),net,SLOT(start()));
     connect(net,SIGNAL(newImage()),this,SLOT(newImage()));
     connect(net,SIGNAL(sendTileCount(int)),this, SLOT(updateTilesCount(int)));
+    /*
+     * 处理当前世界坐标位置信号
+     * */
     connect(this,SIGNAL(sendLocationPos(QPointF)),this,SLOT(updateLocationPos(QPointF)));
     QList<LayerFormat> xlist;
     LayerFormat f1;
-    f1.name = "id";
+    f1.name = "info";
     f1.type = ILongNUMBER;
     LayerFormat f2;
     f2.name = "name";
@@ -84,16 +96,6 @@ void ILong::setDefaultLocation(QPointF worldCoordinate, quint8 zoomLevel)
     {
         zoomTo(defaultLocation,currentLevel);
     }
-}
-
-QList<QString> *ILong::getImageList()
-{
-    return &list;
-}
-
-QString ILong::getServer()
-{
-    return map.getServer();
 }
 
 QList<Layer *> ILong::getLayers() const
@@ -252,18 +254,25 @@ void ILong::tilesUrlMatrix()
     background.fill(QColor(Qt::lightGray));
     backgroundPos = mapFromScene((-leftTop.x()+middle.x())*DEFAULTTILESIZE,
                                  (-leftTop.y()+middle.y())*DEFAULTTILESIZE);
-    QMultiMap<int, int> tList;
+    /*
+     * 先把所有有效的瓦片坐标保存到tList里
+     * */
+    QList<QPoint> tList;
     for(int x=-leftTop.x()+middle.x(); x<=rightTiles+middle.x(); x++)
     {
         for(int y=-leftTop.y()+middle.y(); y<=bottomTiles+middle.y(); y++)
         {
             if(map.isTileValid(x,y,currentLevel))
             {
-                tList.insertMulti(x,y);
+                tList.append(QPoint(x,y));
             }
 
         }
     }
+    /*
+     * 再从数据库里读取当前场景有效的瓦片,如果读取失败,直接把@tList里的所有坐标生成path保存到@list里,
+     * 然后跳到最后启动下载线程
+     * */
     QSqlQuery * query = sqlExcute.checkImage(leftTop.x()+middle.x(), -rightTiles+middle.x(),
                                              leftTop.y()+middle.y(), -bottomTiles+middle.y(), currentLevel);
     bool checkImageError = false;
@@ -271,13 +280,16 @@ void ILong::tilesUrlMatrix()
     {
         while(!tList.isEmpty())
         {
-            int key = tList.firstKey();
-            QString path = map.queryTile(key,tList.first(),currentLevel);
+            QPoint p = tList.first();
+            QString path = map.queryTile(p.x(),p.y(),currentLevel);
             list.contains(path) ? list.move(list.indexOf(path),0) : list.insert(0,path);
-            tList.remove(key,tList.first());
+            tList.removeFirst();
         }
         checkImageError = true;
     }
+    /*
+     * 如果读取成功,得把瓦片打印到场景的背景图里,并删除@tList里的对就瓦片的坐标
+     * */
     while (query->next() && !checkImageError)
     {
         int x = query->value(0).toInt();
@@ -290,20 +302,25 @@ void ILong::tilesUrlMatrix()
                            ,(y+leftTop.y()-middle.y())*DEFAULTTILESIZE
                            ,DEFAULTTILESIZE,DEFAULTTILESIZE,pm);
         painter.end();
-        tList.remove(x,y);
+        tList.removeOne(QPoint(x,y));
     }
     if(query)
     {
         delete query;
         query = 0;
     }
+    /*
+     * 到了这里,如果tList还没空,那就说明有此瓦片是在数据库里没有的,需要从@tList里把坐标转成path保存到@list里然后启动下载线程
+     * 之所以用随机数,就是为了影响瓦片的下载顺序,让人看着感觉不是只能从一个方向刷新场景背景的了,没多大用处
+     * */
+    qsrand(QDateTime::currentDateTime().time().second());
     while(!tList.isEmpty() && !checkImageError)
     {
-        int key = tList.firstKey();
-        int value = tList.first();
-        QString path = map.queryTile(key, value, currentLevel);
+        int index = qrand() % tList.size();
+        QPoint value = tList.at(index);
+        QString path = map.queryTile(value.x(), value.y(), currentLevel);
         list.contains(path) ? list.move(list.indexOf(path),0) : list.insert(0,path);
-        tList.remove(key, value);
+        tList.removeOne(value);
     }
     if(!networkThread.isRunning())
         networkThread.start();
