@@ -9,6 +9,7 @@
 #include <QDebug>
 
 #include "ilong_global.h"
+#include "Geometry.h"
 
 /*
  * 第一次面向对象,也是第一次使用c++,所以呢,很多不会的了,反正现在是把所有数据库操作的都放到这个类里了!
@@ -20,6 +21,8 @@ class SQLExcute : public QObject
     Q_OBJECT
 public:
     explicit SQLExcute(QObject *parent = 0);
+    void addItems(QList<Geometry::ILongDataType> *dataList,
+                  QString id, QList <ILongType> *headType);
     /*
      * 获取当前场景范围内的所有瓦片并返回QSqlQuery,用完了需要自己删除指针
      */

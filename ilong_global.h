@@ -20,27 +20,49 @@
 #define DEFAULTLOCATION QPointF(0,0)
 #define CONFIGPATH QDir::homePath() + "/.ilong.io/"
 
+
 typedef struct
 {
     int x;
     int y;
     int z;
 } TPoint;
-
-//几种图元类型
+/*
+ * 图元类型就只会为两种,
+ * 1,点类图元,可以有很多种点类图元,都是以中心点画图元
+ * 2,面类图元,由多个坐标生成的图元,线条也是面类图元的一种
+ * */
 typedef enum
 {
-    GeoNull,//初始化类型
-    GeoPoint,//点
-    GeoCircle,//圆
-    GeoLine,//线
-    GeoRect,//矩形
-    GeoStar,//五角星
-    GeoTri,//三角形
-    GeoMouse,//老鼠
-    GeoPie,//扁形
+    iGeoNull,    //初始化类型
+    //点类图元
+    iGeoCircle,  //点 圆
+    iGeoRect,    //矩形
+    iGeoStar,    //五角星
+    iGeoTri,     //三角形
+    iGeoMouse,   //老鼠
+    iGeoPie,     //扁形
+    //面类图元
+    iGeoPolygon
 } ILongGeoType;
-
+/*
+ * 面类图元线类型,是有箭头和没箭头
+ * */
+typedef enum
+{
+    LineNull,   //没箭头
+    LineStart,  //开始有箭头
+    LineEnd,    //结束有箭头
+    LineBoth,   //双箭头
+} ILongLineType;
+//保存图元的边界
+typedef struct
+{
+    qreal minX;
+    qreal minY;
+    qreal maxX;
+    qreal maxY;
+} ILongGeoRect;
 //数据库字段类型,只设计文本和数值
 typedef enum
 {

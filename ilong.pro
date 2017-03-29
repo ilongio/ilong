@@ -18,7 +18,10 @@ SOURCES += ILong.cpp \
     ILoveChina.cpp \
     SQLExcute.cpp \
     Manager.cpp \
-    Layer.cpp
+    Layer.cpp \
+    Geometry.cpp \
+    GeoMouse.cpp \
+    GeoPie.cpp
 
 HEADERS += ILong.h\
         ilong_global.h \
@@ -27,7 +30,10 @@ HEADERS += ILong.h\
     ILoveChina.h \
     SQLExcute.h \
     Manager.h \
-    Layer.h
+    Layer.h \
+    Geometry.h \
+    GeoMouse.h \
+    GeoPie.h
 
 unix {
     target.path = /usr/lib

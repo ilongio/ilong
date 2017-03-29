@@ -6,6 +6,7 @@
 
 #include "ILong.h"
 #include "SQLExcute.h"
+#include "Geometry.h"
 
 /*
  * 提供简单的图元管理功能
@@ -27,12 +28,12 @@ public:
      * */
     Layer(ILong * parent, QString id, QString name, bool visible, bool selectable);
     ~Layer();
-    void addItem(QGraphicsItem *item);
-    void removeItem(QGraphicsItem *item);
+    void addItem(QList<Geometry::ILongDataType> * dataList);
+    void removeItem(Geometry *item);
     /*
      * 返回所有图元的地址
      * */
-    QList<QGraphicsItem *> * getItems();
+    QList<QGraphicsItem *> *getItems();
     /*
      * 返回图层名称
      * */

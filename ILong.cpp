@@ -32,16 +32,26 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
      * 处理当前世界坐标位置信号
      * */
     connect(this,SIGNAL(sendLocationPos(QPointF)),this,SLOT(updateLocationPos(QPointF)));
-    QList<LayerFormat> xlist;
-    LayerFormat f1;
-    f1.name = "info";
-    f1.type = ILongNUMBER;
-    LayerFormat f2;
-    f2.name = "name";
-    f2.type = ILongTEXT;
-    xlist.append(f1);
-    xlist.append(f2);
-    manager->addLayer("xxx", &xlist);
+//    QList<LayerFormat> xlist;
+//    LayerFormat f1;
+//    f1.name = "info";
+//    f1.type = ILongNUMBER;
+//    LayerFormat f2;
+//    f2.name = "name";
+//    f2.type = ILongTEXT;
+//    xlist.append(f1);
+//    xlist.append(f2);
+//    Layer * l = manager->addLayer("xxx", &xlist);
+//    QList<QPointF> p;
+//    p.append(QPointF(99.80875,27.72188));
+//    Geometry::ILongDataType t;
+//    t.data.append(12);
+//    t.data.append("ilongio");
+//    t.geometry = new Geometry(GeoCircle,p,LineNull,1,8,QColor(Qt::red),QColor(Qt::red));
+//    QList<Geometry::ILongDataType> gl;
+//    gl.append(t);
+//    l->addItem(&gl);
+
 }
 
 ILong::~ILong()
@@ -114,6 +124,20 @@ void ILong::removeLayer(QString name)
 {
     manager->removeLayer(name);
 }
+QPointF ILong::worldToScene(QPointF world)
+{
+    world = ILoveChina::wgs84TOgcj02(world);
+    return QPointF((world.x()+180) * (numberOfTiles*DEFAULTTILESIZE)/360.,
+                  (1-(log(tan(PI/4.+degreeToRadian(world.y())/2.)) /PI)) /2.  * (numberOfTiles*DEFAULTTILESIZE));
+}
+
+QPointF ILong::sceneToWorld(QPointF scene)
+{
+
+    return ILoveChina::gcj02Towgs84(QPointF((scene.x()*(360./(numberOfTiles*DEFAULTTILESIZE)))-180,
+                       radianToDegree(atan(sinh((1-scene.y()*(2./(numberOfTiles*DEFAULTTILESIZE)))*PI)))));
+}
+
 
 bool ILong::viewportEvent(QEvent *event)
 {
@@ -209,20 +233,6 @@ void ILong::resizeEvent(QResizeEvent *event)
 {
     event->accept();
     zoomTo(defaultLocation,currentLevel);
-}
-
-QPointF ILong::worldToScene(QPointF world)
-{
-    world = ILoveChina::wgs84TOgcj02(world);
-    return QPointF((world.x()+180) * (numberOfTiles*DEFAULTTILESIZE)/360.,
-                  (1-(log(tan(PI/4.+degreeToRadian(world.y())/2.)) /PI)) /2.  * (numberOfTiles*DEFAULTTILESIZE));
-}
-
-QPointF ILong::sceneToWorld(QPointF scene)
-{
-    QPointF gcj = QPointF((scene.x()*(360./(numberOfTiles*DEFAULTTILESIZE)))-180,
-                          radianToDegree(atan(sinh((1-scene.y()*(2./(numberOfTiles*DEFAULTTILESIZE)))*PI))));
-    return ILoveChina::gcj02Towgs84(gcj);
 }
 
 qreal ILong::degreeToRadian(qreal value)
@@ -381,6 +391,28 @@ void ILong::viewChangedSlot()
 //    px->setPos(worldToScene(defaultLocation));
 //    px->setScale(itemScale);
 //    scene()->addItem(px);
+    GeoPie * gm = new GeoPie(QPointF(99.70875,27.82188),80,QColor(Qt::green),QColor(Qt::red));
+    gm->setPos(worldToScene(QPointF(99.70875,27.82188)));
+    gm->setScale(itemScale);
+    gm->setLabel("第一小区");
+    gm->rotate(0);
+
+    scene()->addItem(gm);
+    GeoPie * gm1 = new GeoPie(QPointF(99.70875,27.82188),80,QColor(Qt::red),QColor(Qt::blue));
+    gm1->setPos(worldToScene(QPointF(99.70875,27.82188)));
+    gm1->setScale(itemScale);
+    gm1->setLabel("在算是第2小区");
+    gm1->rotate(120);
+
+    scene()->addItem(gm1);
+
+    GeoPie * gm2 = new GeoPie(QPointF(99.70875,27.82188),80,QColor(Qt::blue),QColor(Qt::green));
+    gm2->setPos(worldToScene(QPointF(99.70875,27.82188)));
+    gm2->setLabel("the last 小区");
+    gm2->setScale(itemScale);
+    gm2->rotate(240);
+
+    scene()->addItem(gm2);
 }
 
 void ILong::newImage()

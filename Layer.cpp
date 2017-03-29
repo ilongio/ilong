@@ -37,12 +37,12 @@ Layer::~Layer()
     sqlExcute->removeLayer(layerID);
 }
 
-void Layer::addItem(QGraphicsItem *item)
+void Layer::addItem(QList<Geometry::ILongDataType> *dataList)
 {
-    layer->addToGroup(item);
+    sqlExcute->addItems(dataList,layerID, &headType);
 }
 
-void Layer::removeItem(QGraphicsItem *item)
+void Layer::removeItem(Geometry *item)
 {
     layer->removeFromGroup(item);
 }

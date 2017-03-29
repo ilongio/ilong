@@ -16,6 +16,8 @@
 #include "SQLExcute.h"
 #include "Manager.h"
 #include "Layer.h"
+#include "GeoMouse.h"
+#include "GeoPie.h"
 
 /*
  * 提供简单的跨平台的瓦片图层框架功能,反正不会C++,更不会面向对象,用来练手的!
@@ -78,6 +80,11 @@ public:
      * 通过图层名称@name删除图层
      * */
     void removeLayer(QString name);
+    /*
+     * 世界坐标和场景坐标相与转换
+     * */
+    inline QPointF worldToScene(QPointF world);
+    inline QPointF sceneToWorld(QPointF scene);
 
 protected:
     bool viewportEvent(QEvent *event);
@@ -87,15 +94,10 @@ protected:
 
 private:
     /*
-     * 世界坐标和场景坐标相与转换
-     * */
-    QPointF worldToScene(QPointF world);
-    QPointF sceneToWorld(QPointF scene);
-    /*
      * 角度和弧度相与转换,没上过高中,数学学得不好,真心不理解弧度,但不影响
      * */
-    qreal degreeToRadian(qreal value);
-    qreal radianToDegree(qreal value);
+    inline qreal degreeToRadian(qreal value);
+    inline qreal radianToDegree(qreal value);
     /*
      * 计算当前地图等级@zoomLevel单行或单列共有多少张瓦片了
      * */
@@ -118,11 +120,11 @@ private:
     /*
      * 检查地图等级@zoomLevel是否有效
      * */
-    bool checkZoomLevel(quint8 zoomLevel);
+    inline bool checkZoomLevel(quint8 zoomLevel);
     /*
      * 检查世界坐标@world是否有效
      * */
-    bool checkWorldCoordinate(QPointF world);
+    inline bool checkWorldCoordinate(QPointF world);
     /*
      * item缩放系数
      * */

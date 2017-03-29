@@ -27,6 +27,7 @@ public:
      * 这个先不管它,可能以后我要用到,先留着
      * */
     static bool DelDir(const QString &path);
+
 private:
     static bool outOfChina(double lon, double lat);
     static double transformLat(double x, double y);
