@@ -1,9 +1,11 @@
 #include "GeoPie.h"
 
-GeoPie::GeoPie(QPointF world, int size, QColor pen, QColor brush) :
+GeoPie::GeoPie(QPointF world, int size, int dir, QColor pen, QColor brush) :
     Geometry(iGeoPie, LineNull, 1, size, pen, brush)
 {
     list.append(world);
+    this->dir = dir;
+    checkRect();
 }
 
 QRectF GeoPie::boundingRect() const

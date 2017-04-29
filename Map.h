@@ -14,7 +14,7 @@ class Map : public QObject
 {
     Q_OBJECT
 public:
-    explicit Map(QObject *parent = 0);
+    explicit ILONGSHARED_EXPORT Map(QObject *parent = 0);
     /*
      * 取到地图供应商服务地址
      * */

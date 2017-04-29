@@ -22,7 +22,7 @@ SQLExcute::SQLExcute(QObject *parent) : QObject(parent)
 }
 
 void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
-                         QString id, QList<ILongType> *headType)
+                         QString id, QList<LayerFormat> *headType)
 {
     QSqlDatabase db;
     if(QSqlDatabase::contains("qt_sql_default_connection"))
@@ -53,7 +53,7 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
         QString sqlT = "";
         for(int j=0; j<headType->size(); j++)
         {
-            if(headType->at(j) == ILongNUMBER)
+            if(headType->at(j).type == ILongNUMBER)
             {
                 /*
                  * 其实感觉没必要检查是不是能转换成数字了,但是我人好嘛,慢点就慢点了
@@ -63,14 +63,14 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
                 qreal result = data.data.at(j).toReal(&ok);
                 if(!ok)
                     result = 0;
-                sqlT += QString(" '%1',").arg(result);
+                sqlT += QString(" '%1', ").arg(result);
             }
             else
             {
-                sqlT += " '" + data.data.at(j).toString() + "' ";
+                sqlT += " '" + data.data.at(j).toString() + "', ";
             }
         }
-        sqlT = sqlT.left(sqlT.length()-1);
+        sqlT = sqlT.left(sqlT.length()-2);
         QString sql = QString("INSERT INTO '%1' VALUES ( '%2', %3 )").arg(id).arg(data.geometry->getID()).arg(sqlT);
         if(!query.exec(sql))
         {
@@ -92,16 +92,17 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
          * @MAXY        图元最大wgs Y坐标 (点类图元写CenterY相同) 设计两个坐标点只为了非点类图元需要计算边界问题,比如线
          * @LABEL       用来显示图标注的, 如果设置显示标注,就从数据表里面把标注内容填充到该字段
          * @INFO        保存图元GIS信息
-         *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-线宽-箭头方向-大小-画笔(R_G_B)-画刷(R_G_B)
-         *              线宽 箭头方向  只对面类图元有影响
-         *              大小         只对点类图元有影响
+         *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-线宽-箭头方向-大小-画笔(R_G_B)-画刷(R_G_B)-旋转角度-闭环
+         *              箭头方向 闭环    只对面类图元有影响 闭环(如果true 就是多边行, false 就是多段线)
+         *              旋转角度 大小    只对点类图元有影响
          *
         */
         QPointF cen = data.geometry->getCenter();
         ILongGeoRect rect = data.geometry->getRect();
-        QString info = QString("%1-%2-%3-%4-%5-%6").arg(data.geometry->getPoints())
+        QString info = QString("%1-%2-%3-%4-%5-%6-%7-%8").arg(data.geometry->getPoints())
                 .arg(data.geometry->getLineWidth()).arg(data.geometry->getLineType())
-                .arg(data.geometry->getSize()).arg(data.geometry->getPen()).arg(data.geometry->getBrush());
+                .arg(data.geometry->getSize()).arg(data.geometry->getPen()).arg(data.geometry->getBrush())
+                .arg(data.geometry->getDir()).arg(data.geometry->getCloseFlag());
         sql = QString("INSERT INTO '%1INFO' VALUES ( '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', '%10', '%11' )")
                 .arg(id).arg(data.geometry->getID()).arg(data.geometry->getGeoType()).arg(cen.x())
                 .arg(cen.y()).arg(rect.minX)
@@ -174,7 +175,16 @@ QSqlQuery *SQLExcute::checkType(QString id)
     return getResult(sql,"checkType " + id);
 }
 
-void SQLExcute::initLayer(QString id, QString name, QList<LayerFormat> * typeList, QList <ILongType> * headType)
+QSqlQuery *SQLExcute::updateLayer(QString id, QPointF topLeft, QPointF rigthBottom, quint32 limit)
+{
+    QString t = QString("NOT ( MINX > %1 OR MAXX < %2 OR MINY > %3 OR MAXY < %4 )")
+            .arg(rigthBottom.x()).arg(topLeft.x()).arg(topLeft.y()).arg(rigthBottom.y());
+    QString sql = QString("SELECT * FROM '%1INFO' WHERE %2 GROUP BY RANDOM() LIMIT 0,%3")
+            .arg(id).arg(t).arg(limit);
+    return getResult(sql,"updat layer");
+}
+
+void SQLExcute::initLayer(QString id, QString name, QList<LayerFormat> * typeList, QList <LayerFormat> * headType)
 {
     /*
      * 在ILONGIOLAYER建立表索引
@@ -191,7 +201,7 @@ void SQLExcute::initLayer(QString id, QString name, QList<LayerFormat> * typeLis
     for(int i=0; i< typeList->size(); i++)
     {
         QString t = QString(" '%1' '%2' , ").arg(typeList->at(i).name).arg(typeList->at(i).type ? "TEXT" : "REAL");
-        headType->append(typeList->at(i).type);
+        headType->append(typeList->at(i));
         saveSql += t;
     }
     saveSql = saveSql.left(saveSql.length() - 2);
@@ -212,9 +222,9 @@ void SQLExcute::initLayer(QString id, QString name, QList<LayerFormat> * typeLis
      * @MAXY        图元最大wgs Y坐标 (点类图元写CenterY相同) 设计两个坐标点只为了非点类图元需要计算边界问题,比如线
      * @LABEL       用来显示图标注的, 如果设置显示标注,就从数据表里面把标注内容填充到该字段
      * @INFO        保存图元GIS信息
-     *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-线宽-箭头方向-大小-画笔(R_G_B)-画刷(R_G_B)
-     *              箭头方向 只对面类图元有影响
-     *              大小    只对点类图元有影响
+     *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-线宽-箭头方向-大小-画笔(R_G_B)-画刷(R_G_B)-旋转角度-闭环
+     *              箭头方向 闭环    只对面类图元有影响 闭环(如果true 就是多边行, false 就是多段线)
+     *              旋转角度 大小    只对点类图元有影响
      *
     */
     sql =QString("CREATE TABLE %1INFO (ILONGID REAL, TYPE REAL, CenterX REAL, CenterY REAL, "
@@ -244,6 +254,18 @@ void SQLExcute::setLayerSelectable(QString id, bool b)
     int result = b ? 1 : 0;
     QString sql = QString("UPDATE ILONGIOLAYER SET SELECTABLE = '%1' WHERE ID = '%2' ").arg(result).arg(id);
     nonResult(sql, "setLayerVisible " + id);
+}
+
+void SQLExcute::setLabel(QString id, QString field)
+{
+    //ILONGNULL 清除标注
+    QString sql;
+    if(field == "ILONGNULL")
+        sql = QString("UPDATE '%1INFO' SET LABEL = 'ILONGNULL' ").arg(id);
+    else
+        sql = QString("UPDATE '%1INFO' SET LABEL = (SELECT %2 FROM '%1' WHERE ILONGID = '%1INFO'.ILONGID) ")
+            .arg(id).arg(field);
+    nonResult(sql, "setLabel " + id);
 }
 
 QSqlQuery *SQLExcute::getResult(QString sql, QString position)

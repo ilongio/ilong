@@ -4,9 +4,10 @@
 ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     currentLevel(DEFAULTZOOMLEVEL),numberOfTiles(tilesOnZoomLevel(currentLevel)),
     defaultLocation(DEFAULTLOCATION),net(new Network(this)),
-    tilesCount(0),currentPos(DEFAULTLOCATION)
+    tilesCount(0),currentPos(DEFAULTLOCATION),itemLimit(1000),defaultZoomCount(0),
+    twoFinger(false)
 {
-    setStyleSheet("background-color:lightGray");
+    setStyleSheet("background-color:rgb(236,236,236)");
     setScene(new QGraphicsScene(this));
     /*
      * @manager得在QGraphicsScene初始化之后才能使用,所以在这里初始化
@@ -16,6 +17,9 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     setVerticalScrollBarPolicy (Qt::ScrollBarAlwaysOff );
     setViewportUpdateMode(FullViewportUpdate);
     centerOn(0,0);
+    //grabGesture(Qt::PinchGesture);
+    //viewport()->setAttribute(Qt::WA_AcceptTouchEvents);
+    //viewport()->grabGesture(Qt::PinchGesture);
     setSceneRect(viewport()->rect());
     /*
      * 处理刷新信号
@@ -47,7 +51,7 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
 //    Geometry::ILongDataType t;
 //    t.data.append(12);
 //    t.data.append("ilongio");
-//    t.geometry = new Geometry(GeoCircle,p,LineNull,1,8,QColor(Qt::red),QColor(Qt::red));
+//    t.geometry = new GeoPie(QPointF(99.80875,27.72188),80,90);
 //    QList<Geometry::ILongDataType> gl;
 //    gl.append(t);
 //    l->addItem(&gl);
@@ -81,6 +85,7 @@ void ILong::zoomIn()
     if(checkZoomLevel(currentLevel + 1))
     {
         currentLevel++;
+        zoomOnPos = viewport()->rect().center();
         zoomTo(sceneToWorld(mapToScene(zoomOnPos)),currentLevel,true);
     }
 }
@@ -90,6 +95,7 @@ void ILong::zoomOut()
     if(checkZoomLevel(currentLevel - 1))
     {
         currentLevel--;
+        zoomOnPos = viewport()->rect().center();
         zoomTo(sceneToWorld(mapToScene(zoomOnPos)),currentLevel,true);
     }
 }
@@ -106,6 +112,12 @@ void ILong::setDefaultLocation(QPointF worldCoordinate, quint8 zoomLevel)
     {
         zoomTo(defaultLocation,currentLevel);
     }
+}
+
+void ILong::zoomOnCenter(int level)
+{
+    if(!checkZoomLevel(level)) return;
+    level > currentLevel ? zoomIn() : zoomOut();
 }
 
 QList<Layer *> ILong::getLayers() const
@@ -135,7 +147,17 @@ QPointF ILong::sceneToWorld(QPointF scene)
 {
 
     return ILoveChina::gcj02Towgs84(QPointF((scene.x()*(360./(numberOfTiles*DEFAULTTILESIZE)))-180,
-                       radianToDegree(atan(sinh((1-scene.y()*(2./(numberOfTiles*DEFAULTTILESIZE)))*PI)))));
+                                            radianToDegree(atan(sinh((1-scene.y()*(2./(numberOfTiles*DEFAULTTILESIZE)))*PI)))));
+}
+
+void ILong::setItemLimit(quint32 limit)
+{
+    itemLimit = limit;
+}
+
+quint32 ILong::getItemLimit()
+{
+    return itemLimit;
 }
 
 
@@ -143,6 +165,54 @@ bool ILong::viewportEvent(QEvent *event)
 {
     switch(event->type())
     {
+//    case QEvent::TouchBegin:
+//    case QEvent::TouchUpdate:
+//    case QEvent::TouchEnd:
+//    {
+//        QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+//        QList<QTouchEvent::TouchPoint> touchPoints = touchEvent->touchPoints();
+//        if (touchPoints.count() == 2) {
+//            touchEvent->accept();
+//            twoFinger = true;
+//            // determine scale factor
+//            const QTouchEvent::TouchPoint touchPoint0 = touchPoints.first();
+//            const QTouchEvent::TouchPoint touchPoint1 = touchPoints.last();
+//            qreal currentScale =
+//                    QLineF(touchPoint0.pos(), touchPoint1.pos()).length()
+//                    / QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+//            zoomOnPos = viewport()->rect().center();
+//            currentScale > 1 ? zoomOut() : zoomIn();
+////            if (touchEvent->touchPointStates() & Qt::TouchPointReleased) {
+////                // if one of the fingers is released, remember the current scale
+////                // factor so that adding another finger later will continue zooming
+////                // by adding new scale factor to the existing remembered value.
+////                defaultZoomCount = 0;
+////            }
+////            if(currentScale < 1)
+////            {
+////                defaultZoomCount - currentScale < -12 ? defaultZoomCount = -12 : defaultZoomCount-=currentScale;
+////            }
+////            else
+////            {
+////                defaultZoomCount + currentScale > 12 ? defaultZoomCount = 12 : defaultZoomCount+=currentScale;
+////            }
+////            if(defaultZoomCount == -12)
+////            {
+////                zoomOut();
+////                defaultZoomCount = 0;
+////                twoFinger = false;
+////                return true;
+////            }
+////            if(defaultZoomCount == 12)
+////            {
+////                zoomIn();
+////                defaultZoomCount = 0;
+////            }
+//            twoFinger = false;
+//            return true;
+//        }
+//        break;
+//    }
     case QEvent::Wheel:
     {
         QWheelEvent * wheelEvent = static_cast<QWheelEvent *>(event);;
@@ -152,6 +222,13 @@ bool ILong::viewportEvent(QEvent *event)
         return true;
         break;
     }
+    case QEvent::MouseButtonDblClick:
+    {
+        QMouseEvent * doubleClickEvent = static_cast<QMouseEvent *>(event);
+        emit doubleClicked(doubleClickEvent->pos());
+        doubleClickEvent->accept();
+        return true;
+    }
     case QEvent::MouseButtonPress:
     {
         QMouseEvent * pressEvent = static_cast<QMouseEvent *>(event);
@@ -159,25 +236,26 @@ bool ILong::viewportEvent(QEvent *event)
         {
             zoomOnPos = pressEvent->pos();
             pressEvent->accept();
-            return true;
         }
-        break;
+        return true;
     }
     case QEvent::MouseMove:
     {
-        QMouseEvent * moveEvent = static_cast<QMouseEvent *>(event);
-        emit sendLocationPos(sceneToWorld(mapToScene(moveEvent->pos())));
-        if(moveEvent->buttons() & Qt::LeftButton)
+        if(!twoFinger)
         {
+            QMouseEvent * moveEvent = static_cast<QMouseEvent *>(event);
+            emit sendLocationPos(sceneToWorld(mapToScene(moveEvent->pos())));
+            if(moveEvent->buttons() & Qt::LeftButton)
+            {
 
-            QPoint moveDelta = moveEvent->pos() - zoomOnPos;
-            setSceneLocation(QPointF(sceneRect().x() - moveDelta.x(),sceneRect().y() - moveDelta.y()));
-            backgroundPos = backgroundPos + moveDelta;
-            zoomOnPos = moveEvent->pos();
-            moveEvent->accept();
-            return true;
+                QPoint moveDelta = moveEvent->pos() - zoomOnPos;
+                setSceneLocation(QPointF(sceneRect().x() - moveDelta.x(),sceneRect().y() - moveDelta.y()));
+                backgroundPos = backgroundPos + moveDelta;
+                zoomOnPos = moveEvent->pos();
+                moveEvent->accept();
+            }
         }
-        break;
+        return true;
     }
     case QEvent::MouseButtonRelease:
     {
@@ -188,10 +266,9 @@ bool ILong::viewportEvent(QEvent *event)
                 emit viewChangedSignal();
                 zoomOnPos = QPoint(0,0);
                 releaseEvent->accept();
-                return true;
             }
         }
-        break;
+        return true;
     }
     default:
         break;
@@ -213,18 +290,15 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     Q_UNUSED(rect);
     painter->save();
     painter->resetTransform();
-    painter->setPen(QColor(Qt::red));
+    painter->setPen(QColor(Qt::green));
     QPoint p = viewport()->rect().center();
     painter->drawLine(p-QPoint(10,0), p+QPoint(10,0));
     painter->drawLine(p-QPoint(0,10), p+QPoint(0,10));
     QFont font = painter->font();
     font.setBold(true);
     painter->setFont(font);
-    painter->setPen(QColor(Qt::yellow));
-    painter->drawText(QPoint(0,10),QString("Lng: %1").arg(currentPos.x(),0,'g',10));
-    painter->drawText(QPoint(0,25),QString("Lat: %1").arg(currentPos.y(),0,'g',10));
-    painter->drawText(QPoint(0,40),QString("Tile: %1").arg(tilesCount));
-    painter->drawText(QPoint(0,55),QString("Level: %1").arg(currentLevel));
+    painter->drawText(QPoint(0,20),QString("Lng:%1 Lat:%2 Til:%3 Lev:%4").arg(currentPos.x(),0,'g',10)
+                      .arg(currentPos.y(),0,'g',10).arg(tilesCount).arg(currentLevel));
 
     painter->restore();
 }
@@ -233,6 +307,28 @@ void ILong::resizeEvent(QResizeEvent *event)
 {
     event->accept();
     zoomTo(defaultLocation,currentLevel);
+}
+
+void ILong::keyPressEvent(QKeyEvent *event)
+{
+    //QMessageBox::information(this,"x",QString::number( event->key()));
+    switch (event->key()) {
+    case Qt::Key_VolumeUp:
+        zoomIn();
+        break;
+    case Qt::Key_VolumeDown:
+        zoomOut();
+        break;
+    default:
+        break;
+    }
+}
+
+void ILong::mouseDoubleClickEvent(QMouseEvent *)
+{
+//    zoomOnPos = viewport()->rect().center();
+//    e->pos().y() < viewport()->rect().center().y() ? zoomIn() : zoomOut();
+    //e->accept();
 }
 
 qreal ILong::degreeToRadian(qreal value)
@@ -261,7 +357,7 @@ void ILong::tilesUrlMatrix()
     int bottomTiles = rightBottomDelta.y() / DEFAULTTILESIZE + 1;
     background = QPixmap((leftTop.x() + rightTiles + 1) * DEFAULTTILESIZE,
                          (leftTop.y() + bottomTiles + 1) * DEFAULTTILESIZE);
-    background.fill(QColor(Qt::lightGray));
+    background.fill(QColor::fromRgb(236,236,236));
     backgroundPos = mapFromScene((-leftTop.x()+middle.x())*DEFAULTTILESIZE,
                                  (-leftTop.y()+middle.y())*DEFAULTTILESIZE);
     /*
@@ -371,48 +467,76 @@ void ILong::viewChangedSlot()
 {
     scene()->clear();
     tilesUrlMatrix();
-    QGraphicsRectItem * r = new QGraphicsRectItem(0,0,10,20);
-    r->setPen(QColor(Qt::red));
-    r->setPos(worldToScene(QPointF(99.70875,27.82188)));
-    r->setScale(itemScale);
-    scene()->addItem(r);
-    QGraphicsTextItem * tpx = new QGraphicsTextItem("YYYYY");
-    tpx->setDefaultTextColor(QColor(Qt::yellow));
-    tpx->setPos(worldToScene(QPointF(99.70875,27.82188)));
-    tpx->setScale(itemScale);
-    scene()->addItem(tpx);
-    QGraphicsTextItem * tx = new QGraphicsTextItem("mmmm");
-    tx->setPos(worldToScene(QPointF(99.80875,27.72188)));
-    tx->setScale(itemScale);
-    tx->setDefaultTextColor(QColor(Qt::green));
-    scene()->addItem(tx);
+    manager->updatLayer();
+//    QGraphicsRectItem * r = new QGraphicsRectItem(0,0,10,20);
+//    r->setPen(QColor(Qt::red));
+//    r->setPos(worldToScene(QPointF(99.70875,27.82188)));
+//    r->setScale(itemScale);
+//    scene()->addItem(r);
+//    QGraphicsTextItem * tpx = new QGraphicsTextItem("YYYYY");
+//    tpx->setDefaultTextColor(QColor(Qt::yellow));
+//    tpx->setPos(worldToScene(QPointF(99.70875,27.82188)));
+//    tpx->setScale(itemScale);
+//    scene()->addItem(tpx);
+//    QGraphicsTextItem * tx = new QGraphicsTextItem("mmmm");
+//    tx->setPos(worldToScene(QPointF(99.80875,27.72188)));
+//    tx->setScale(itemScale);
+//    tx->setDefaultTextColor(QColor(Qt::green));
+//    scene()->addItem(tx);
 //    QGraphicsTextItem * px = new QGraphicsTextItem("center");
 //    px->setDefaultTextColor(QColor(Qt::red));
 //    px->setPos(worldToScene(defaultLocation));
 //    px->setScale(itemScale);
 //    scene()->addItem(px);
-    GeoPie * gm = new GeoPie(QPointF(99.70875,27.82188),80,QColor(Qt::green),QColor(Qt::red));
-    gm->setPos(worldToScene(QPointF(99.70875,27.82188)));
-    gm->setScale(itemScale);
-    gm->setLabel("第一小区");
-    gm->rotate(0);
+//    GeoPie * gm = new GeoPie(QPointF(99.70875,27.82188),120,QColor(Qt::green),QColor(Qt::red));
+//    gm->setPos(worldToScene(QPointF(99.70875,27.82188)));
+//    gm->setScale(itemScale);
+//    gm->setLabel("第一小区");
+//    gm->setZValue(1);
+//    gm->rotate(0);
+//    gm->setZValue(0);
+//    gm->setFlag(QGraphicsItem::ItemIsSelectable);
 
-    scene()->addItem(gm);
-    GeoPie * gm1 = new GeoPie(QPointF(99.70875,27.82188),80,QColor(Qt::red),QColor(Qt::blue));
-    gm1->setPos(worldToScene(QPointF(99.70875,27.82188)));
-    gm1->setScale(itemScale);
-    gm1->setLabel("在算是第2小区");
-    gm1->rotate(120);
+//    scene()->addItem(gm);
+//    GeoPie * gm1 = new GeoPie(QPointF(99.70875,27.82188),120,QColor(Qt::red),QColor(Qt::blue));
+//    gm1->setPos(worldToScene(QPointF(99.70875,27.82188)));
+//    gm1->setScale(itemScale);
+//    gm1->setLabel("在算是第2小区");
+//    gm1->rotate(120);
 
-    scene()->addItem(gm1);
+//    scene()->addItem(gm1);
 
-    GeoPie * gm2 = new GeoPie(QPointF(99.70875,27.82188),80,QColor(Qt::blue),QColor(Qt::green));
-    gm2->setPos(worldToScene(QPointF(99.70875,27.82188)));
-    gm2->setLabel("the last 小区");
-    gm2->setScale(itemScale);
-    gm2->rotate(240);
+//    GeoPie * gm2 = new GeoPie(QPointF(99.70875,27.82188),120,QColor(Qt::blue),QColor(Qt::green));
+//    gm2->setPos(worldToScene(QPointF(99.70875,27.82188)));
+//    gm2->setLabel("the last 小区");
+//    gm2->setScale(itemScale);
+//    gm2->rotate(240);
 
-    scene()->addItem(gm2);
+//    scene()->addItem(gm2);
+
+//    GeoPie * gm4 = new GeoPie(QPointF(99.70875,27.82188),80,QColor(Qt::green),QColor(Qt::yellow));
+//    gm4->setPos(worldToScene(QPointF(99.70875,27.82188)));
+//    gm4->setScale(itemScale);
+//    gm4->setLabel("xxxxx");
+//    gm4->rotate(0);
+//    gm4->setFlag(QGraphicsItem::ItemIsSelectable);
+
+//    scene()->addItem(gm4);
+//    GeoPie * gm5 = new GeoPie(QPointF(99.70875,27.82188),80,QColor(Qt::red),QColor(Qt::gray));
+//    gm5->setPos(worldToScene(QPointF(99.70875,27.82188)));
+//    gm5->setScale(itemScale);
+//    gm5->setLabel("在算是第dfdfd2小区");
+//    gm5->rotate(120);
+
+//    scene()->addItem(gm5);
+
+//    GeoPie * gm6 = new GeoPie(QPointF(99.70875,27.82188),80,QColor(Qt::blue),QColor(Qt::white));
+//    gm6->setPos(worldToScene(QPointF(99.70875,27.82188)));
+//    gm6->setLabel("the sssslast 小区");
+//    gm6->setScale(itemScale);
+//    gm6->rotate(240);
+
+//    scene()->addItem(gm6);
 }
 
 void ILong::newImage()

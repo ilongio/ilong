@@ -13,10 +13,24 @@
  * */
 
 class ILong;
-class Layer : public QObject
+class ILONGSHARED_EXPORT Layer : public QObject
 {
     Q_OBJECT
 public:
+    typedef struct
+    {
+        quint32 id;
+        QPointF center;
+        QString label;
+        QList<QPointF> list;
+        int width;
+        int lineDir;
+        int size;
+        QColor pen;
+        QColor brush;
+        int dir;
+        bool close;
+    } ILongInfo;
     /*
      * 新增图层
      * @name 图层名称
@@ -29,11 +43,10 @@ public:
     Layer(ILong * parent, QString id, QString name, bool visible, bool selectable);
     ~Layer();
     void addItem(QList<Geometry::ILongDataType> * dataList);
+    QList<Geometry *> *getItems();
     void removeItem(Geometry *item);
-    /*
-     * 返回所有图元的地址
-     * */
-    QList<QGraphicsItem *> *getItems();
+    void updatLayer();
+    void setLabel(QString field = "ILONGNULL");
     /*
      * 返回图层名称
      * */
@@ -45,6 +58,7 @@ public:
     /*
      * 设置和返回图层可视状态
      * */
+    QList<LayerFormat> *getLayerHead();
     void setVisible(bool b);
     bool isVisible();
     /*
@@ -53,17 +67,15 @@ public:
     void setSelectable(bool b);
     bool isSelectable();
 private:
+    ILongInfo getInfo(QSqlQuery * query);
+    QList<QPointF> getGisList(QString gis);
+    void addGeoPie(QSqlQuery * query);
     ILong * iLong;
-    /*
-     * 保存场景里的组指针
-     * 一个场景里可以建很多的图元组嘛, 一个组就管理自己的图元 就当时图层了
-     * */
-    QGraphicsItemGroup * layer;
     QString layerLabel;
     /*
      * 保存当前图层的图元指针
      * */
-    QList<QGraphicsItem *> list;
+    //QList<QGraphicsItem *> list;
     QString layerID;
     bool visible;
     bool selectable;
@@ -71,7 +83,8 @@ private:
     /*
      * 保存当前图层的字段类型,只为了方便导入数据时数据转换检查
      * */
-    QList <ILongType> headType;
+    QList <LayerFormat> headType;
+    QList <Geometry *> list;
 signals:
 
 public slots:

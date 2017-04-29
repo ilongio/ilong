@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       -= gui
+#QT       -= gui
 QT       += widgets network sql
 
 TARGET = ilong

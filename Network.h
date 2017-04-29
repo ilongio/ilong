@@ -15,7 +15,7 @@
  * */
 
 class ILong;
-class Network : public QObject
+class ILONGSHARED_EXPORT Network : public QObject
 {
     Q_OBJECT
 public:

@@ -7,6 +7,7 @@
 #include <QPainter>
 #include <QLabel>
 #include <QUuid>
+#include <QDebug>
 
 #include "ilong_global.h"
 
@@ -14,7 +15,7 @@
  * 图元基类,提供所有点类和面类的基本结构
  * */
 
-class Geometry : public QGraphicsObject
+class ILONGSHARED_EXPORT Geometry : public QGraphicsObject
 {
     Q_OBJECT
 public:
@@ -39,6 +40,8 @@ public:
     quint8 getLineWidth();
     quint8 getSize();
     quint32 getID();
+    int getDir();
+    bool getCloseFlag();
     void rotate(int dir);
     void setLabel(QString lb);
     int getLabelPixeSize();
@@ -53,6 +56,8 @@ protected:
     ILongGeoRect rect;
     quint32 itemID;
     QString label;
+    int dir;
+    bool closeFlag;
 signals:
 
 public slots:

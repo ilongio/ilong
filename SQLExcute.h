@@ -16,13 +16,13 @@
  * 有用没用都先这么活着,总比不活强多了!~_~,发现我没事我还以自己乐了!
  */
 
-class SQLExcute : public QObject
+class ILONGSHARED_EXPORT SQLExcute : public QObject
 {
     Q_OBJECT
 public:
     explicit SQLExcute(QObject *parent = 0);
     void addItems(QList<Geometry::ILongDataType> *dataList,
-                  QString id, QList <ILongType> *headType);
+                  QString id, QList<LayerFormat> *headType);
     /*
      * 获取当前场景范围内的所有瓦片并返回QSqlQuery,用完了需要自己删除指针
      */
@@ -41,6 +41,7 @@ public:
      * 保存到自己的图层里,方便插入图元数据的时候判断数据类型而已,没想到更好的办法,用完了需要自己删除指针
      */
     QSqlQuery *checkType(QString id);
+    QSqlQuery *updateLayer(QString id, QPointF topLeft, QPointF rigthBottom, quint32 limit = 1000);
     /*
      * 创建图层,@id是图层的id,用来做数据库里的表名,在class Layer里自动生成,
      * @name 图层名称,创建图层时需要自己指定一个名称,
@@ -48,7 +49,7 @@ public:
      * @headType 就是在图层里用来保存表里所有字段的数据类型 只为了插入图元数据的字段类型选择,为了安全,还是每个数据都做个转换,
      *           如果转换失败,基本都是文本转数字失败,就填0,可能影响效率.
      */
-    void initLayer(QString id, QString name, QList<LayerFormat> *typeList, QList<ILongType> *headType);
+    void initLayer(QString id, QString name, QList<LayerFormat> *typeList, QList<LayerFormat> *headType);
     /*
      * 删除图层,@id可以通过图层获得
      */
@@ -61,6 +62,7 @@ public:
      * 设置图层是否可选
      */
     void setLayerSelectable(QString id,bool b);
+    void setLabel(QString id,QString field);
 private:
     /*
      * 通用执行有返回结果的@sql语句

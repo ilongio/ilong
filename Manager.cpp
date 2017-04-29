@@ -43,6 +43,15 @@ void Manager::removeLayer(QString name)
     }
 }
 
+void Manager::updatLayer()
+{
+    iLong->scene()->clear();
+    for(int i=0; i<list.size(); i++)
+    {
+        list.at(i)->updatLayer();
+    }
+}
+
 QString Manager::checkLayerName(QString name)
 {
     QString tmp = name ;

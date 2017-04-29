@@ -38,10 +38,10 @@ typedef enum
     //点类图元
     iGeoCircle,  //点 圆
     iGeoRect,    //矩形
-    iGeoStar,    //五角星
-    iGeoTri,     //三角形
     iGeoMouse,   //老鼠
     iGeoPie,     //扁形
+    iGeoStar,    //五角星
+    iGeoTri,     //三角形
     //面类图元
     iGeoPolygon
 } ILongGeoType;

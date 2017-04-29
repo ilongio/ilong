@@ -11,6 +11,8 @@ Geometry::Geometry(ILongGeoType gType, ILongLineType lType, quint8 lWidth, quint
     QUuid id = QUuid::createUuid();
     itemID = id.data1;
     label = "";
+    dir = 0;
+    closeFlag = true;
 }
 
 ILongGeoRect Geometry::getRect()
@@ -67,6 +69,16 @@ quint8 Geometry::getSize()
 quint32 Geometry::getID()
 {
     return itemID;
+}
+
+int Geometry::getDir()
+{
+    return dir;
+}
+
+bool Geometry::getCloseFlag()
+{
+    return closeFlag;
 }
 
 void Geometry::rotate(int dir)

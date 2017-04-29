@@ -3,7 +3,7 @@
 
 #include "Geometry.h"
 
-class GeoMouse : public Geometry
+class ILONGSHARED_EXPORT GeoMouse : public Geometry
 {
     Q_OBJECT
 public:

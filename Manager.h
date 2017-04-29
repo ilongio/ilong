@@ -14,7 +14,7 @@
 
 class ILong;
 class Layer;
-class Manager : public QObject
+class ILONGSHARED_EXPORT Manager : public QObject
 {
     Q_OBJECT
 public:
@@ -32,6 +32,7 @@ public:
      * 通过图层名称@name直接删除图层
      * */
     void removeLayer(QString name);
+    void updatLayer();
 private:
     /*
      * 检查图层名称@name是否在图层管理表里,如果有,就自动在@name后面加*号,暂时这样处理导入多个同名图层

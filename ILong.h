@@ -5,6 +5,9 @@
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 #include <QWheelEvent>
+#include <QGestureEvent>
+#include <QMessageBox>
+#include <QPinchGesture>
 #include <QThread>
 #include <QtMath>
 #include <QList>
@@ -66,6 +69,7 @@ public:
      * 和zoomTo差不多,但是zoomTo参数多了点,供内部使用的,这函数也调用zoomTo函数,只想提供一个简单API给外部调用
      * */
     void setDefaultLocation(QPointF worldCoordinate, quint8 zoomLevel);
+    void zoomOnCenter(int level);
     /*
      * 返回所有图层
      * */
@@ -83,15 +87,18 @@ public:
     /*
      * 世界坐标和场景坐标相与转换
      * */
-    inline QPointF worldToScene(QPointF world);
-    inline QPointF sceneToWorld(QPointF scene);
+    QPointF worldToScene(QPointF world);
+    QPointF sceneToWorld(QPointF scene);
 
+    void setItemLimit(quint32 limit = 1000);
+    quint32 getItemLimit();
 protected:
     bool viewportEvent(QEvent *event);
     void drawBackground(QPainter *p, const QRectF &rect);
     void drawForeground(QPainter *painter, const QRectF &rect);
     void resizeEvent(QResizeEvent *event);
-
+    void keyPressEvent(QKeyEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *);
 private:
     /*
      * 角度和弧度相与转换,没上过高中,数学学得不好,真心不理解弧度,但不影响
@@ -192,10 +199,15 @@ private:
      * */
     QPointF currentPos;
 
+    quint32 itemLimit;
+
+    int defaultZoomCount;
+    bool twoFinger;
 signals:
     void viewChangedSignal();
     void downloadImage();
     void sendLocationPos(QPointF);
+    void doubleClicked(QPoint);
 public slots:
     void viewChangedSlot();
     void newImage();
