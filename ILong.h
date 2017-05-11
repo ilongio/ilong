@@ -21,6 +21,8 @@
 #include "Layer.h"
 #include "GeoMouse.h"
 #include "GeoPie.h"
+#include "SelectInfo.h"
+#include "ItemInfo.h"
 
 /*
  * 提供简单的跨平台的瓦片图层框架功能,反正不会C++,更不会面向对象,用来练手的!
@@ -28,6 +30,8 @@
 
 class Network;
 class Manager;
+class ItemInfo;
+
 class ILONGSHARED_EXPORT ILong : public QGraphicsView
 {
     Q_OBJECT
@@ -35,6 +39,8 @@ public:
     friend class Manager;
     friend class Layer;
     friend class Network;
+    friend class ItemInfo;
+
     ILong(QWidget *parent);
     ~ILong();
 
@@ -66,10 +72,8 @@ public:
      * 设置默认的地图加载
      * @worldCoordinate 位置
      * @zoomLevel       地图等级
-     * 和zoomTo差不多,但是zoomTo参数多了点,供内部使用的,这函数也调用zoomTo函数,只想提供一个简单API给外部调用
      * */
     void setDefaultLocation(QPointF worldCoordinate, quint8 zoomLevel);
-    void zoomOnCenter(int level);
     /*
      * 返回所有图层
      * */
@@ -89,16 +93,18 @@ public:
      * */
     QPointF worldToScene(QPointF world);
     QPointF sceneToWorld(QPointF scene);
-
+    /*
+     * 设置或返回一个图层的最大图元个数@limit, 一个图层图元太多意义不大
+     * */
     void setItemLimit(quint32 limit = 1000);
     quint32 getItemLimit();
+
 protected:
     bool viewportEvent(QEvent *event);
     void drawBackground(QPainter *p, const QRectF &rect);
     void drawForeground(QPainter *painter, const QRectF &rect);
     void resizeEvent(QResizeEvent *event);
     void keyPressEvent(QKeyEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *);
 private:
     /*
      * 角度和弧度相与转换,没上过高中,数学学得不好,真心不理解弧度,但不影响
@@ -200,9 +206,23 @@ private:
     QPointF currentPos;
 
     quint32 itemLimit;
-
-    int defaultZoomCount;
-    bool twoFinger;
+    /*
+     * 保存鼠标按下后是否移动了,如果移动了就更新
+     * */
+    bool mouseMove;
+    /*
+     * 默认有一个图层,这个图层可以用来保存 GPS当前坐标和统计GPS数据用 或者是临时点之类的数据
+     * */
+    Layer * tempLayer;
+    /*
+     * 如果有GPS数据 用来保存卫星个数 没想那么多,对于有定位设备的设备而已
+     * */
+    int satellitesCount;
+    /*
+     * 如果有GPS数据 保存高度
+     * */
+    qreal GPSAltitude;
+    QList<double> distanceList;
 signals:
     void viewChangedSignal();
     void downloadImage();
@@ -213,6 +233,8 @@ public slots:
     void newImage();
     void updateTilesCount(int count);
     void updateLocationPos(QPointF world);
+    void updateInfo(QPointF GPSPos , qreal speed, qreal dir, qreal altitude);//pos, speed, dir,altitude
+    void updateSatellitesCount(int count);
 };
 
 #endif // ILONG_H

@@ -232,6 +232,12 @@ void SQLExcute::initLayer(QString id, QString name, QList<LayerFormat> * typeLis
     nonResult(sql, "initLayer create info table ");
 }
 
+QSqlQuery *SQLExcute::getItemInfo(QString itemLayerID, QString itemID)
+{
+    QString sql = QString("SELECT * FROM '%1' WHERE ILONGID = '%2'").arg(itemLayerID).arg(itemID);
+    return getResult(sql,"getItemInfo");
+}
+
 void SQLExcute::removeLayer(QString id)
 {
     QString sql = QString("DELETE FROM ILONGIOLAYER WHERE ID = '%1' ").arg(id);

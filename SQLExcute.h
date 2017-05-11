@@ -50,6 +50,7 @@ public:
      *           如果转换失败,基本都是文本转数字失败,就填0,可能影响效率.
      */
     void initLayer(QString id, QString name, QList<LayerFormat> *typeList, QList<LayerFormat> *headType);
+    QSqlQuery * getItemInfo(QString itemLayerID, QString itemID);
     /*
      * 删除图层,@id可以通过图层获得
      */

@@ -1,4 +1,5 @@
 #include "GeoPie.h"
+#include <math.h>
 
 GeoPie::GeoPie(QPointF world, int size, int dir, QColor pen, QColor brush) :
     Geometry(iGeoPie, LineNull, 1, size, pen, brush)
@@ -10,8 +11,7 @@ GeoPie::GeoPie(QPointF world, int size, int dir, QColor pen, QColor brush) :
 
 QRectF GeoPie::boundingRect() const
 {
-    qreal adjust = 0.0;
-    return QRectF(-size/2 - adjust, -size/2 - adjust, size + adjust, size + adjust);
+    return QRectF(-size/2, -size/2, size, size);
 }
 
 QPainterPath GeoPie::shape() const

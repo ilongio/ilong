@@ -18,6 +18,8 @@ protected:
 signals:
 
 public slots:
+private:
+
 };
 
 #endif // GEOPIE_H

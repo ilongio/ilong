@@ -53,9 +53,41 @@ void Layer::removeItem(Geometry *item)
     iLong->scene()->removeItem(item);
 }
 
+void Layer::addTempItem(ILongGeoType type, QPointF world, quint32 dir)
+{
+    tempGeoType = type;
+    tempGeoWorldPos = world;
+    updateTempItem(dir);
+}
+
+void Layer::updateTempItem(quint32 dir)
+{
+    if(tempGeo)
+    {
+        tempGeo->rotate(dir);
+        tempGeo->setPos(iLong->worldToScene(tempGeoWorldPos));
+        return;
+    }
+    switch (tempGeoType) {
+    case iGeoMouse:
+        tempGeo = new GeoMouse(tempGeoWorldPos);
+        break;
+    default:
+        break;
+    }
+    if(tempGeo)
+    {
+        tempGeo->setPos(iLong->worldToScene(tempGeoWorldPos));
+        tempGeo->setScale(iLong->itemScale);
+        tempGeo->rotate(dir);
+        iLong->scene()->addItem(tempGeo);
+    }
+}
+
 void Layer::updatLayer()
 {
     list.clear();
+    tempGeo = nullptr;
     QPointF leftTop = iLong->sceneToWorld(iLong->mapToScene(QPoint(0,0)));
     QPointF rightBottom = iLong->sceneToWorld(iLong->mapToScene(QPoint(iLong->viewport()->width(),
                                                                        iLong->viewport()->height())));
@@ -73,6 +105,7 @@ void Layer::updatLayer()
     }
     delete query;
     query = 0;
+    updateTempItem();
 }
 
 void Layer::setLabel(QString field)

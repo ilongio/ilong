@@ -6,6 +6,7 @@ GeoMouse::GeoMouse(QPointF world): Geometry(iGeoMouse, LineNull, 1, 40,
 {
     list.append(world);
     checkRect();
+    startTimer(1000 / 200);
 }
 
 QRectF GeoMouse::boundingRect() const
@@ -23,6 +24,7 @@ QPainterPath GeoMouse::shape() const
 
 void GeoMouse::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
+    painter->setPen(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
     // Body
     painter->setBrush(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
     painter->drawEllipse(-10, -20, 20, 40);
@@ -54,4 +56,9 @@ void GeoMouse::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
     painter->setBrush(Qt::NoBrush);
     painter->drawPath(path);
 
+}
+
+void GeoMouse::timerEvent(QTimerEvent *)
+{
+    update();
 }

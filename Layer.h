@@ -17,6 +17,7 @@ class ILONGSHARED_EXPORT Layer : public QObject
 {
     Q_OBJECT
 public:
+
     typedef struct
     {
         quint32 id;
@@ -45,6 +46,8 @@ public:
     void addItem(QList<Geometry::ILongDataType> * dataList);
     QList<Geometry *> *getItems();
     void removeItem(Geometry *item);
+    void addTempItem(ILongGeoType type, QPointF world, quint32 dir = 0);
+    void updateTempItem(quint32 dir = 0);
     void updatLayer();
     void setLabel(QString field = "ILONGNULL");
     /*
@@ -85,6 +88,9 @@ private:
      * */
     QList <LayerFormat> headType;
     QList <Geometry *> list;
+    Geometry * tempGeo;
+    QPointF tempGeoWorldPos;
+    ILongGeoType tempGeoType;
 signals:
 
 public slots:

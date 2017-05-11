@@ -44,6 +44,7 @@ public:
     bool getCloseFlag();
     void rotate(int dir);
     void setLabel(QString lb);
+    QString getLabel();
     int getLabelPixeSize();
 protected:
     void checkRect();

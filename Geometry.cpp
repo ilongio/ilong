@@ -91,6 +91,11 @@ void Geometry::setLabel(QString lb)
     label = lb;
 }
 
+QString Geometry::getLabel()
+{
+    return label;
+}
+
 int Geometry::getLabelPixeSize()
 {
     QLabel lb;

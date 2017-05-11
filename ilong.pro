@@ -21,7 +21,9 @@ SOURCES += ILong.cpp \
     Layer.cpp \
     Geometry.cpp \
     GeoMouse.cpp \
-    GeoPie.cpp
+    GeoPie.cpp \
+    SelectInfo.cpp \
+    ItemInfo.cpp
 
 HEADERS += ILong.h\
         ilong_global.h \
@@ -33,9 +35,15 @@ HEADERS += ILong.h\
     Layer.h \
     Geometry.h \
     GeoMouse.h \
-    GeoPie.h
+    GeoPie.h \
+    SelectInfo.h \
+    ItemInfo.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+FORMS += \
+    SelectInfo.ui \
+    ItemInfo.ui

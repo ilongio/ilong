@@ -31,6 +31,8 @@ public:
     /*
      * 通过图层名称@name直接删除图层
      * */
+    Layer *getLayer(QString name);
+    Layer *getLayerByID(QString id);
     void removeLayer(QString name);
     void updatLayer();
 private:

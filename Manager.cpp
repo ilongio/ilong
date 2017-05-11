@@ -23,13 +23,45 @@ QList<Layer *> Manager::getLayers()
 Layer *Manager::addLayer(QString name, QList<LayerFormat> *typeList)
 {
     QString layerName = checkLayerName(name);
+    if(name == "TempILong" && layerName != name)
+        return getLayer(name);
     Layer * layer  = new Layer(iLong, layerName, typeList);
     list.append(layer);
     return layer;
 }
 
+Layer *Manager::getLayer(QString name)
+{
+    Layer * l = nullptr;
+    for(int i=0; i<list.size(); i++)
+    {
+        if(list.at(i)->getLayerName() == name)
+        {
+            l = list.at(i);
+            break;
+        }
+    }
+    return l;
+}
+
+Layer *Manager::getLayerByID(QString id)
+{
+    Layer * l = nullptr;
+    for(int i=0; i<list.size(); i++)
+    {
+        if(list.at(i)->getLayerID() == id)
+        {
+            l = list.at(i);
+            break;
+        }
+    }
+    return l;
+}
+
 void Manager::removeLayer(QString name)
 {
+    if(name == "TempILong")
+        return;
     for(int i=0; i<list.size(); i++)
     {
        if(list.at(i)->getLayerName() == name)
