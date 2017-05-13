@@ -55,6 +55,7 @@ public:
      * 删除图层,@id可以通过图层获得
      */
     void removeLayer(QString id);
+    void clearLayer(QString id);
     /*
      * 设置图层是否可视
      */

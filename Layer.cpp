@@ -8,6 +8,10 @@ Layer::Layer(ILong *parent, QString name, QList<LayerFormat> *typeList) : iLong(
      * */
     QUuid id = QUuid::createUuid();
     layerID =  QString("ILONGIO%1").arg(id.data1);
+    LayerFormat f;
+    f.name = "ILONGID";
+    f.type = ILongNUMBER;
+    headType.append(f);
     sqlExcute->initLayer(layerID,layerLabel,typeList, &headType);
 }
 
@@ -69,6 +73,15 @@ void Layer::updateTempItem(quint32 dir)
         return;
     }
     switch (tempGeoType) {
+    case iGeoCircle:
+        tempGeo = new GeoRect(tempGeoWorldPos);
+        break;
+    case iGeoRect:
+        tempGeo = new GeoRect(tempGeoWorldPos);
+        break;
+    case iGeoPie:
+        tempGeo = new GeoPie(tempGeoWorldPos);
+        break;
     case iGeoMouse:
         tempGeo = new GeoMouse(tempGeoWorldPos);
         break;
@@ -96,6 +109,15 @@ void Layer::updatLayer()
     {
         int type = query->value(1).toInt();
         switch (type) {
+        case iGeoCircle:
+            addGeoCircle(query);
+            break;
+        case iGeoRect:
+            addGeoRect(query);
+            break;
+        case iGeoMouse:
+            addGeoMouse(query);
+            break;
         case iGeoPie:
             addGeoPie(query);
             break;
@@ -188,6 +210,21 @@ QList<QPointF> Layer::getGisList(QString gis)
     return l;
 }
 
+void Layer::addGeoCircle(QSqlQuery *query)
+{
+    ILongInfo itemInfo = getInfo(query);
+    GeoCircle * p = new GeoCircle(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
+    p->setPos(iLong->worldToScene(itemInfo.center));
+    if(itemInfo.label != "ILONGNULL")
+        p->setLabel(itemInfo.label);
+    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
+    p->setScale(iLong->itemScale);
+    p->rotate(itemInfo.dir);
+    p->setFlag(QGraphicsItem::ItemIsFocusable);
+    iLong->scene()->addItem(p);
+    list.append(p);
+}
+
 void Layer::addGeoPie(QSqlQuery *query)
 {
     /*
@@ -219,4 +256,34 @@ void Layer::addGeoPie(QSqlQuery *query)
     iLong->scene()->addItem(p);
     list.append(p);
 
+}
+
+void Layer::addGeoMouse(QSqlQuery *query)
+{
+    ILongInfo itemInfo = getInfo(query);
+    GeoMouse * p = new GeoMouse(itemInfo.center);
+    p->setPos(iLong->worldToScene(itemInfo.center));
+    if(itemInfo.label != "ILONGNULL")
+        p->setLabel(itemInfo.label);
+    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
+    p->setScale(iLong->itemScale);
+    p->rotate(itemInfo.dir);
+    p->setFlag(QGraphicsItem::ItemIsFocusable);
+    iLong->scene()->addItem(p);
+    list.append(p);
+}
+
+void Layer::addGeoRect(QSqlQuery *query)
+{
+    ILongInfo itemInfo = getInfo(query);
+    GeoRect * p = new GeoRect(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
+    p->setPos(iLong->worldToScene(itemInfo.center));
+    if(itemInfo.label != "ILONGNULL")
+        p->setLabel(itemInfo.label);
+    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
+    p->setScale(iLong->itemScale);
+    p->rotate(itemInfo.dir);
+    p->setFlag(QGraphicsItem::ItemIsFocusable);
+    iLong->scene()->addItem(p);
+    list.append(p);
 }

@@ -72,7 +72,10 @@ public:
 private:
     ILongInfo getInfo(QSqlQuery * query);
     QList<QPointF> getGisList(QString gis);
+    void addGeoCircle(QSqlQuery *query);
     void addGeoPie(QSqlQuery * query);
+    void addGeoMouse(QSqlQuery *query);
+    void addGeoRect(QSqlQuery *query);
     ILong * iLong;
     QString layerLabel;
     /*

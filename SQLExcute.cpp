@@ -42,7 +42,7 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
     for(int i=0; i<dataList->size(); i++)
     {
         Geometry::ILongDataType data = dataList->at(i);
-        if(data.data.size() < headType->size())
+        if(data.data.size() + 1 < headType->size())
         {
             qDebug() << "data error";
             continue;
@@ -51,7 +51,7 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
          * 先把数据插入到数据表先
          * */
         QString sqlT = "";
-        for(int j=0; j<headType->size(); j++)
+        for(int j=1; j<headType->size(); j++)
         {
             if(headType->at(j).type == ILongNUMBER)
             {
@@ -60,14 +60,14 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
                  * 等有好办法再说
                  * */
                 bool ok;
-                qreal result = data.data.at(j).toReal(&ok);
+                qreal result = data.data.at(j-1).toReal(&ok);
                 if(!ok)
                     result = 0;
                 sqlT += QString(" '%1', ").arg(result);
             }
             else
             {
-                sqlT += " '" + data.data.at(j).toString() + "', ";
+                sqlT += " '" + data.data.at(j-1).toString() + "', ";
             }
         }
         sqlT = sqlT.left(sqlT.length()-2);
@@ -248,6 +248,14 @@ void SQLExcute::removeLayer(QString id)
     nonResult(sql, "DROP INFO TABLE " + id);
 }
 
+void SQLExcute::clearLayer(QString id)
+{
+    QString sql = QString("DELETE FROM '%1' ").arg(id);
+    nonResult(sql, "CLEAR " + id);
+    sql = QString("DELETE FROM '%1INFO' ").arg(id);
+    nonResult(sql, "CLEAR INFO TABLE " + id);
+}
+
 void SQLExcute::setLayerVisible(QString id, bool b)
 {
     int result = b ? 1 : 0;
@@ -317,6 +325,7 @@ void SQLExcute::nonResult(QString sql, QString position)
     if(!query.exec(sql))
     {
         qDebug() << position << query.lastError().text();
+        qDebug() << sql;
     }
 }
 

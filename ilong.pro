@@ -23,7 +23,9 @@ SOURCES += ILong.cpp \
     GeoMouse.cpp \
     GeoPie.cpp \
     SelectInfo.cpp \
-    ItemInfo.cpp
+    ItemInfo.cpp \
+    GeoRect.cpp \
+    GeoCircle.cpp
 
 HEADERS += ILong.h\
         ilong_global.h \
@@ -37,7 +39,9 @@ HEADERS += ILong.h\
     GeoMouse.h \
     GeoPie.h \
     SelectInfo.h \
-    ItemInfo.h
+    ItemInfo.h \
+    GeoRect.h \
+    GeoCircle.h
 
 unix {
     target.path = /usr/lib

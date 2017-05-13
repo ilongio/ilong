@@ -19,8 +19,10 @@
 #include "SQLExcute.h"
 #include "Manager.h"
 #include "Layer.h"
+#include "GeoRect.h"
 #include "GeoMouse.h"
 #include "GeoPie.h"
+#include "GeoCircle.h"
 #include "SelectInfo.h"
 #include "ItemInfo.h"
 
@@ -78,6 +80,7 @@ public:
      * 返回所有图层
      * */
     QList<Layer *> getLayers() const;
+    Layer * getlayer(QString name) const;
     /*
      * 新增图层
      * @name     图层名称

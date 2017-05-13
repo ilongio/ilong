@@ -40,7 +40,10 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
 //    resetMatrix();
 //    scale(1,1);
     QList <LayerFormat> fm;
-    fm.append(LayerFormat{"TempName",ILongTEXT});
+    fm.append(LayerFormat{"X",ILongNUMBER});
+    fm.append(LayerFormat{"Y",ILongNUMBER});
+    fm.append(LayerFormat{"VALUE",ILongNUMBER});
+    fm.append(LayerFormat{"NAME",ILongTEXT});
     tempLayer = manager->addLayer("TempILong", &fm);
 
 }
@@ -100,6 +103,11 @@ void ILong::setDefaultLocation(QPointF worldCoordinate, quint8 zoomLevel)
 QList<Layer *> ILong::getLayers() const
 {
     return manager->getLayers();
+}
+
+Layer *ILong::getlayer(QString name) const
+{
+    return manager->getLayer(name);
 }
 
 Layer *ILong::addLayer(QString name, QList<LayerFormat> *typeList) const

@@ -60,19 +60,24 @@ Layer *Manager::getLayerByID(QString id)
 
 void Manager::removeLayer(QString name)
 {
+     Layer * l = getLayer(name);
     if(name == "TempILong")
-        return;
-    for(int i=0; i<list.size(); i++)
     {
-       if(list.at(i)->getLayerName() == name)
-       {
-           Layer * layer = list.at(i);
-           delete layer;
-           layer = 0;
-           list.removeAt(i);
-           return;
-       }
+        if(l != nullptr)
+            sqlExcute->clearLayer(l->getLayerID());
+        return;
     }
+    if(l != nullptr)
+    {
+        if(name == "TempILong")
+            sqlExcute->clearLayer(l->getLayerID());
+        else
+        {
+            list.removeOne(l);
+            delete l;
+        }
+    }
+
 }
 
 void Manager::updatLayer()
