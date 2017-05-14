@@ -45,6 +45,8 @@ void SelectInfo::viewClicked(QModelIndex index)
 {
     QString layerName = model->index(index.row(),0).data().toString();
     QString itemID = model->index(index.row(),1).data().toString();
+    if(layerName.isEmpty() || itemID.isEmpty())
+        return;
     ItemInfo itemInfo(iLong, layerName, itemID);
     itemInfo.exec();
 }

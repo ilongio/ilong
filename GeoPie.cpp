@@ -17,7 +17,12 @@ QRectF GeoPie::boundingRect() const
 QPainterPath GeoPie::shape() const
 {
     QPainterPath path;
-    path.addRect(-size/2, -size/2, size, size);
+    //path.addRect(-size/2, -size/2, size, size);
+    QPolygonF polygon;
+    polygon.append(QPointF(0,0));
+    polygon.append(QPointF(-size/6,-size/2));
+    polygon.append(QPointF(size/6,-size/2));
+    path.addPolygon(polygon);
     return path;
 }
 

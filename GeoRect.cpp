@@ -1,7 +1,7 @@
 #include "GeoRect.h"
 
 GeoRect::GeoRect(QPointF world, int size, QColor pen, QColor brush) :
-  Geometry(iGeoRect, LineNull, 1, size/2, pen, brush)
+  Geometry(iGeoRect, LineNull, 1, size*0.6, pen, brush)
 {
     list.append(world);
     checkRect();
@@ -31,7 +31,7 @@ void GeoRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
         //font.setPixelSize(12);
         painter->setFont(font);
         painter->setPen(brush);
-        painter->drawText(-getLabelPixeSize()/2,-size/2-5,label);
+        painter->drawText(-getLabelPixeSize()/2,size+5,label);
 
     }
 }

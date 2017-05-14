@@ -1,7 +1,7 @@
 #include "GeoCircle.h"
 
 GeoCircle::GeoCircle(QPointF world, int size,  QColor pen, QColor brush) :
-    Geometry(iGeoCircle, LineNull, 1, size/2, pen, brush)
+    Geometry(iGeoCircle, LineNull, 1, size*0.6, pen, brush)
 {
     list.append(world);
     checkRect();
@@ -31,7 +31,7 @@ void GeoCircle::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidg
         //font.setPixelSize(12);
         painter->setFont(font);
         painter->setPen(brush);
-        painter->drawText(-getLabelPixeSize()/2,-size/2-5,label);
+        painter->drawText(-getLabelPixeSize()/2,size+5,label);
 
     }
 }

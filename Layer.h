@@ -76,6 +76,8 @@ private:
     void addGeoPie(QSqlQuery * query);
     void addGeoMouse(QSqlQuery *query);
     void addGeoRect(QSqlQuery *query);
+    void addGeoStar(QSqlQuery *query);
+    void addGeoTri(QSqlQuery *query);
     ILong * iLong;
     QString layerLabel;
     /*

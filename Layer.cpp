@@ -85,6 +85,12 @@ void Layer::updateTempItem(quint32 dir)
     case iGeoMouse:
         tempGeo = new GeoMouse(tempGeoWorldPos);
         break;
+    case iGeoStar:
+        tempGeo = new GeoStar(tempGeoWorldPos);
+        break;
+    case iGeoTri:
+        tempGeo = new GeoTri(tempGeoWorldPos);
+        break;
     default:
         break;
     }
@@ -120,6 +126,12 @@ void Layer::updatLayer()
             break;
         case iGeoPie:
             addGeoPie(query);
+            break;
+        case iGeoStar:
+            addGeoStar(query);
+            break;
+        case iGeoTri:
+            addGeoTri(query);
             break;
         default:
             break;
@@ -277,6 +289,36 @@ void Layer::addGeoRect(QSqlQuery *query)
 {
     ILongInfo itemInfo = getInfo(query);
     GeoRect * p = new GeoRect(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
+    p->setPos(iLong->worldToScene(itemInfo.center));
+    if(itemInfo.label != "ILONGNULL")
+        p->setLabel(itemInfo.label);
+    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
+    p->setScale(iLong->itemScale);
+    p->rotate(itemInfo.dir);
+    p->setFlag(QGraphicsItem::ItemIsFocusable);
+    iLong->scene()->addItem(p);
+    list.append(p);
+}
+
+void Layer::addGeoStar(QSqlQuery *query)
+{
+    ILongInfo itemInfo = getInfo(query);
+    GeoStar * p = new GeoStar(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
+    p->setPos(iLong->worldToScene(itemInfo.center));
+    if(itemInfo.label != "ILONGNULL")
+        p->setLabel(itemInfo.label);
+    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
+    p->setScale(iLong->itemScale);
+    p->rotate(itemInfo.dir);
+    p->setFlag(QGraphicsItem::ItemIsFocusable);
+    iLong->scene()->addItem(p);
+    list.append(p);
+}
+
+void Layer::addGeoTri(QSqlQuery *query)
+{
+    ILongInfo itemInfo = getInfo(query);
+    GeoTri * p = new GeoTri(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
     p->setPos(iLong->worldToScene(itemInfo.center));
     if(itemInfo.label != "ILONGNULL")
         p->setLabel(itemInfo.label);

@@ -23,6 +23,8 @@
 #include "GeoMouse.h"
 #include "GeoPie.h"
 #include "GeoCircle.h"
+#include "GeoStar.h"
+#include "GeoTri.h"
 #include "SelectInfo.h"
 #include "ItemInfo.h"
 

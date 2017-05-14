@@ -25,7 +25,9 @@ SOURCES += ILong.cpp \
     SelectInfo.cpp \
     ItemInfo.cpp \
     GeoRect.cpp \
-    GeoCircle.cpp
+    GeoCircle.cpp \
+    GeoStar.cpp \
+    GeoTri.cpp
 
 HEADERS += ILong.h\
         ilong_global.h \
@@ -41,7 +43,9 @@ HEADERS += ILong.h\
     SelectInfo.h \
     ItemInfo.h \
     GeoRect.h \
-    GeoCircle.h
+    GeoCircle.h \
+    GeoStar.h \
+    GeoTri.h
 
 unix {
     target.path = /usr/lib
