@@ -259,17 +259,19 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     font.setBold(true);
     painter->setFont(font);
     double line = distanceList.at( zoomLevel() ) / pow(2.0, MAXZOOMLEVEL-zoomLevel() ) / 0.597164;
-    QPoint p1(width()-10,height()-(int)line);
-    QPoint p2(width()-20,height() - 20);
-    QRect r(p1,p2);
-    painter->drawRect(r);
+    QPoint p1(10,height()-20);
+    QPoint p2((int)line,height()-20);
+    painter->drawLine(p1,p2);
+    painter->drawLine(10,height()-15, 10,height()-25);
+    painter->drawLine((int)line,height()-15, (int)line,height()-25);
     QString distance = QVariant( distanceList.at(zoomLevel())/1000 ).toString() + "km";
+    painter->drawText(QPoint((int)line+10,height()-15), distance);
     painter->translate(width()-12,10);
     painter->rotate(90);
-    painter->drawText(QPoint(0,10),QString("Lng:%1 Lat:%2 Alt:%3 Tiles:%4 Stls:%5 Lev:%6 ILONG.IO:%7")
+    painter->drawText(QPoint(0,10),QString("LNG:%1 LAT:%2 ALT:%3 TIL:%4 STL:%5 LEV:%6")
                       .arg(currentPos.x(),0,'g',10)
                       .arg(currentPos.y(),0,'g',10).arg(GPSAltitude).arg(tilesCount)
-                      .arg(satellitesCount).arg(currentLevel).arg(distance) );
+                      .arg(satellitesCount).arg(currentLevel) );
     painter->restore();
 }
 

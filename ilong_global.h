@@ -40,8 +40,8 @@ typedef enum
     iGeoRect,    //矩形
     iGeoMouse,   //老鼠
     iGeoPie,     //扁形
-    iGeoStar,    //五边形,本来是要画成一角星的 但是不会算五角星的10个点坐标,看来我的孩子得给他好好上学
-    iGeoTri,     //三角形
+    iGeoStar,    //星星
+    iGeoTri,     //三角
     //面类图元
     iGeoPolygon
 } ILongGeoType;

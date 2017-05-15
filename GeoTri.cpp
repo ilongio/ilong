@@ -1,7 +1,7 @@
 #include "GeoTri.h"
 
 GeoTri::GeoTri(QPointF world, int size, QColor pen, QColor brush) :
-    Geometry(iGeoTri, LineNull, 1, size, pen, brush)
+    Geometry(iGeoTri, LineNull, 1, size*0.6, pen, brush)
 {
     list.append(world);
     checkRect();
@@ -16,10 +16,9 @@ QPainterPath GeoTri::shape() const
 {
     QPainterPath path;
     QPolygonF polygon;
-    qreal r = size/2;
-    polygon.append(QPointF(0,-r+r/2));
-    polygon.append(QPointF(-r/2,r*sin(60)+r/2));
-    polygon.append(QPointF(r/2,r*sin(60)+r/2));
+    polygon.append(QPointF(0,-size/2));
+    polygon.append(QPointF(-size/2,size/2));
+    polygon.append(QPointF(size/2,size/2));
     path.addPolygon(polygon);
     return path;
 }
@@ -29,10 +28,9 @@ void GeoTri::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget 
     painter->setPen(pen);
     painter->setBrush(brush);
     QPolygonF polygon;
-    qreal r = size/2;
-    polygon.append(QPointF(0,-r+r/2));
-    polygon.append(QPointF(-r/2,r*sin(60)+r/2));
-    polygon.append(QPointF(r/2,r*sin(60)+r/2));
+    polygon.append(QPointF(0,-size/2));
+    polygon.append(QPointF(-size/2,size/2));
+    polygon.append(QPointF(size/2,size/2));
     painter->drawPolygon(polygon);
     if(label.length())
     {
