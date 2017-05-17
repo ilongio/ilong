@@ -7,7 +7,7 @@ class ILONGSHARED_EXPORT GeoMouse : public Geometry
 {
     Q_OBJECT
 public:
-    explicit GeoMouse(QPointF world);
+    explicit GeoMouse(QPointF world, quint32 gsize = 80);
 protected:
     QRectF boundingRect() const Q_DECL_OVERRIDE;
     QPainterPath shape() const Q_DECL_OVERRIDE;

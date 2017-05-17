@@ -5,7 +5,7 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     currentLevel(DEFAULTZOOMLEVEL),numberOfTiles(tilesOnZoomLevel(currentLevel)),
     defaultLocation(DEFAULTLOCATION),net(new Network(this)),
     tilesCount(0),currentPos(DEFAULTLOCATION),itemLimit(200),
-    satellitesCount(0)
+    satellitesCount(0),GPSAltitude(0),GPSDir(0)
 {
     distanceList<<5000000<<2000000<<1000000<<1000000<<1000000<<100000<<100000<<50000<<50000<<10000<<10000<<10000<<1000<<1000<<500<<200<<100<<50<<25;
     setStyleSheet("background-color:rgb(236,236,236)");
@@ -259,19 +259,28 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     font.setBold(true);
     painter->setFont(font);
     double line = distanceList.at( zoomLevel() ) / pow(2.0, MAXZOOMLEVEL-zoomLevel() ) / 0.597164;
-    QPoint p1(10,height()-20);
-    QPoint p2((int)line,height()-20);
+    QPoint p1(10,10);
+    QPoint p2((int)line,10);
+    QPoint p3(10,(int)line);
     painter->drawLine(p1,p2);
-    painter->drawLine(10,height()-15, 10,height()-25);
-    painter->drawLine((int)line,height()-15, (int)line,height()-25);
-    QString distance = QVariant( distanceList.at(zoomLevel())/1000 ).toString() + "km";
-    painter->drawText(QPoint((int)line+10,height()-15), distance);
+    painter->drawLine(p2,QPoint((int)line,15));
+    painter->drawLine(p1,p3);
+    painter->drawLine(QPoint(15,(int)line),p3);
+//    painter->drawLine(10,height()-15, 10,height()-25);
+//    painter->drawLine((int)line,height()-15, (int)line,height()-25);
+    QString distance = QVariant( distanceList.at(zoomLevel())/1000 ).toString();
+    painter->drawText(QPoint(10,height()-15), QString("(%1) %2km").arg(currentLevel).arg(distance));
+    QLabel lb;
+    QString copyRight("iLong.io");
+    painter->drawText(QPoint((width()-lb.fontMetrics().width(copyRight))/2,height()-15),copyRight);
     painter->translate(width()-12,10);
     painter->rotate(90);
-    painter->drawText(QPoint(0,10),QString("LNG:%1 LAT:%2 ALT:%3 TIL:%4 STL:%5 LEV:%6")
-                      .arg(currentPos.x(),0,'g',10)
-                      .arg(currentPos.y(),0,'g',10).arg(GPSAltitude).arg(tilesCount)
-                      .arg(satellitesCount).arg(currentLevel) );
+    QString north = currentPos.x() >= 0 ? "N" : "S";
+    QString east = currentPos.y() >= 0 ? "E" : "W";
+    painter->drawText(QPoint(0,10),QString("%1%2 %3%4 A:%5 D:%6 T:%7 S:%8").arg(north)
+                      .arg(fabs(currentPos.x()),0,'g',10).arg(east)
+                      .arg(fabs(currentPos.y()),0,'g',10).arg(GPSAltitude).arg(GPSDir).arg(tilesCount)
+                      .arg(satellitesCount) );
     painter->restore();
 }
 
@@ -456,6 +465,7 @@ void ILong::updateLocationPos(QPointF world)
 void ILong::updateInfo(QPointF GPSPos, qreal speed, qreal dir, qreal altitude)
 {
     Q_UNUSED(speed);
+    GPSDir = dir;
     tempLayer->addTempItem(iGeoMouse,GPSPos, dir);
     currentPos = GPSPos;
     GPSAltitude = altitude;

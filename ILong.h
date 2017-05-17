@@ -227,6 +227,7 @@ private:
      * 如果有GPS数据 保存高度
      * */
     qreal GPSAltitude;
+    qreal GPSDir;
     QList<double> distanceList;
 signals:
     void viewChangedSignal();
