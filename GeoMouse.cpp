@@ -1,6 +1,6 @@
 #include "GeoMouse.h"
 
-GeoMouse::GeoMouse(QPointF world, quint32 gsize): Geometry(iGeoMouse, LineNull, 1, gsize * 0.3,
+GeoMouse::GeoMouse(QPointF world, quint32 gsize): Geometry(iGeoMouse, LineNull, gsize * 0.3,
                                                    QColor(qrand() % 256, qrand() % 256, qrand() % 256),
                                                    QColor(qrand() % 256, qrand() % 256, qrand() % 256))
 {
@@ -25,6 +25,7 @@ void GeoMouse::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 {
     painter->setPen(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
     painter->setBrush(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
+    painter->setRenderHint(QPainter::Antialiasing);
     painter->drawEllipse(-size/2, -size/2, size, size);
     if(label.length())
     {

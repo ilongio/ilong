@@ -29,7 +29,7 @@ public:
         QList<QVariant> data;   //一行数据放到data列表里
     } ILongDataType;
 
-    explicit Geometry(ILongGeoType gType, ILongLineType lType, quint8 lWidth, quint8 pSize, QColor iPen, QColor iBrush);
+    explicit Geometry(ILongGeoType gType, ILongLineType lType, quint8 lWidth, QColor iPen, QColor iBrush);
     ILongGeoRect getRect();
     ILongGeoType getGeoType();
     ILongLineType getLineType();

@@ -45,6 +45,21 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     fm.append(LayerFormat{"VALUE",ILongNUMBER});
     fm.append(LayerFormat{"NAME",ILongTEXT});
     tempLayer = manager->addLayer("TempILong", &fm);
+//        QList<QPointF> mmm;
+//        mmm.append(QPointF(99.70875,27.82188));
+//        mmm.append(QPointF(99.70886,27.83168));
+//        mmm.append(QPointF(99.71169,27.85062));
+//        Geometry * g= new GeoPolygon(this,&mmm,false);
+//        QList<Geometry::ILongDataType> tt;
+//        Geometry::ILongDataType t;
+//        t.geometry = g;
+//        t.data.append(0);
+//        t.data.append(0);
+//        t.data.append(0);
+//        t.data.append("xxxx");
+//        tt.append(t);
+//        tempLayer->addItem(&tt);
+
 
 }
 
@@ -241,6 +256,7 @@ void ILong::drawBackground(QPainter *p, const QRectF &rect)
     Q_UNUSED(rect);
     p->save();
     p->resetTransform();
+    p->setRenderHint(QPainter::Antialiasing);
     p->drawPixmap(backgroundPos,background);
     p->restore();
 }
@@ -250,6 +266,7 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     Q_UNUSED(rect);
     painter->save();
     painter->resetTransform();
+    painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(QColor(Qt::green));
     painter->setBrush(QColor(Qt::green));
     QPoint p = viewport()->rect().center();

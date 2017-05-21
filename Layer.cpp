@@ -133,6 +133,9 @@ void Layer::updatLayer()
         case iGeoTri:
             addGeoTri(query);
             break;
+        case iGeoPolygon:
+            addPolygon(query);
+            break;
         default:
             break;
         }
@@ -197,7 +200,7 @@ Layer::ILongInfo Layer::getInfo(QSqlQuery *query)
     QStringList gis = query->value(9).toString().split('-');
     info.list = getGisList(gis.at(0));
     info.width = gis.at(1).toInt();
-    info.lineDir = gis.at(2).toInt();
+    info.lineDir = (ILongLineType)gis.at(2).toInt();
     info.size = gis.at(3).toInt();
     QStringList iPen = gis.at(4).split('_');
     info.pen = QColor(iPen.at(0).toInt(),iPen.at(1).toInt(),iPen.at(2).toInt());
@@ -325,6 +328,19 @@ void Layer::addGeoTri(QSqlQuery *query)
     p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
     p->setScale(iLong->itemScale);
     p->rotate(itemInfo.dir);
+    p->setFlag(QGraphicsItem::ItemIsFocusable);
+    iLong->scene()->addItem(p);
+    list.append(p);
+}
+
+void Layer::addPolygon(QSqlQuery *query)
+{
+    ILongInfo itemInfo = getInfo(query);
+    GeoPolygon * p = new GeoPolygon(iLong,&itemInfo.list,itemInfo.close,itemInfo.width,itemInfo.lineDir,itemInfo.pen,itemInfo.brush);
+    p->setPos(iLong->worldToScene(QPointF(p->getRect().minX,p->getRect().maxY)));
+    if(itemInfo.label != "ILONGNULL")
+        p->setLabel(itemInfo.label);
+    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
     p->setFlag(QGraphicsItem::ItemIsFocusable);
     iLong->scene()->addItem(p);
     list.append(p);

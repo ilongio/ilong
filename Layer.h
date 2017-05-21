@@ -25,7 +25,7 @@ public:
         QString label;
         QList<QPointF> list;
         int width;
-        int lineDir;
+        ILongLineType lineDir;
         int size;
         QColor pen;
         QColor brush;
@@ -78,6 +78,7 @@ private:
     void addGeoRect(QSqlQuery *query);
     void addGeoStar(QSqlQuery *query);
     void addGeoTri(QSqlQuery *query);
+    void addPolygon(QSqlQuery *query);
     ILong * iLong;
     QString layerLabel;
     /*

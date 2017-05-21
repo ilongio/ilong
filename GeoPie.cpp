@@ -2,7 +2,7 @@
 #include <math.h>
 
 GeoPie::GeoPie(QPointF world, int size, int dir, QColor pen, QColor brush) :
-    Geometry(iGeoPie, LineNull, 1, size, pen, brush)
+    Geometry(iGeoPie, LineNull, size, pen, brush)
 {
     list.append(world);
     this->dir = dir;
@@ -30,6 +30,7 @@ void GeoPie::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget 
 {
     painter->setPen(pen);
     painter->setBrush(brush);
+    painter->setRenderHint(QPainter::Antialiasing);
     painter->drawPie(-size/2, -size/2, size, size-2,70*16, 40*16);
     if(label.length())
     {

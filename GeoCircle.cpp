@@ -1,7 +1,7 @@
 #include "GeoCircle.h"
 
 GeoCircle::GeoCircle(QPointF world, int size,  QColor pen, QColor brush) :
-    Geometry(iGeoCircle, LineNull, 1, size*0.6, pen, brush)
+    Geometry(iGeoCircle, LineNull, size*0.6, pen, brush)
 {
     list.append(world);
     checkRect();
@@ -23,6 +23,7 @@ void GeoCircle::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidg
 {
     painter->setPen(pen);
     painter->setBrush(brush);
+    painter->setRenderHint(QPainter::Antialiasing);
     painter->drawEllipse(-size/2, -size/2, size, size);
     if(label.length())
     {

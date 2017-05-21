@@ -25,6 +25,7 @@
 #include "GeoCircle.h"
 #include "GeoStar.h"
 #include "GeoTri.h"
+#include "GeoPolygon.h"
 #include "SelectInfo.h"
 #include "ItemInfo.h"
 
@@ -35,6 +36,7 @@
 class Network;
 class Manager;
 class ItemInfo;
+class GeoPolygon;
 
 class ILONGSHARED_EXPORT ILong : public QGraphicsView
 {

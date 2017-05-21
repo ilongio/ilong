@@ -1,18 +1,24 @@
 #include "Geometry.h"
 
-Geometry::Geometry(ILongGeoType gType, ILongLineType lType, quint8 lWidth, quint8 pSize,QColor iPen,QColor iBrush)
+Geometry::Geometry(ILongGeoType gType, ILongLineType lType, quint8 lWidth,QColor iPen,QColor iBrush)
 {
     geoType = gType;
     lineType = lType;
-    lineWidth = lWidth;
+    if(gType == iGeoPolygon)
+        lineWidth = lWidth;
+    else
+        size = lWidth;
     pen = iPen;
     brush = iBrush;
-    size = pSize;
     QUuid id = QUuid::createUuid();
     itemID = id.data1;
     label = "";
     dir = 0;
-    closeFlag = true;
+    closeFlag = false;
+    rect.maxX = 0;
+    rect.maxY = 0;
+    rect.minX = 0;
+    rect.minY = 0;
 }
 
 ILongGeoRect Geometry::getRect()
@@ -32,7 +38,7 @@ ILongLineType Geometry::getLineType()
 
 QPointF Geometry::getCenter()
 {
-    return list.at(0);
+    return QPointF((rect.maxX + rect.minX)/2,(rect.maxY + rect.minY)/2);
 }
 
 QString Geometry::getPen()
@@ -105,7 +111,10 @@ int Geometry::getLabelPixeSize()
 void Geometry::checkRect()
 {
     if(list.size() == 0)
+    {
         list.append(QPointF(0,0));
+        list.append(QPointF(0,0));
+    }
     if(list.size() == 1)
     {
         if(geoType != iGeoPolygon)
@@ -116,31 +125,20 @@ void Geometry::checkRect()
             rect.maxY = list.at(0).y();
             return;
         }
-        list.append(QPointF(0,0));
+        list.append(list.at(0));
     }
+    QPointF p1 = list.at(0);
+    rect.minX = p1.x();
+    rect.minY = p1.y();
+    rect.maxX = p1.x();
+    rect.maxY = p1.y();
+
     for(int i=1; i<list.size(); i++)
     {
-        QPointF p1 = list.at(i-1);
-        QPointF p2 = list.at(i);
-        if(p1.x() > p2.x())
-        {
-            rect.maxX = p1.x();
-            rect.minX = p2.x();
-        }
-        else
-        {
-            rect.maxX = p2.x();
-            rect.minX = p1.x();
-        }
-        if(p1.y() > p2.y())
-        {
-            rect.maxY = p1.y();
-            rect.minY = p2.y();
-        }
-        else
-        {
-            rect.maxY = p2.y();
-            rect.minY = p1.y();
-        }
+        p1 = list.at(i);
+        if(p1.x() >= rect.maxX) rect.maxX = p1.x();
+        if(p1.x() <= rect.minX) rect.minX = p1.x();
+        if(p1.y() >= rect.maxY) rect.maxY = p1.y();
+        if(p1.y() <= rect.minY) rect.minY = p1.y();
     }
 }

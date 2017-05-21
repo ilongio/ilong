@@ -1,7 +1,7 @@
 #include "GeoStar.h"
 
 GeoStar::GeoStar(QPointF world, int size, QColor pen, QColor brush) :
-    Geometry(iGeoStar, LineNull, 1, size*0.8, pen, brush)
+    Geometry(iGeoStar, LineNull, size*0.8, pen, brush)
 {
     list.append(world);
     checkRect();
@@ -29,6 +29,7 @@ void GeoStar::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
 {
     painter->setPen(pen);
     painter->setBrush(brush);
+    painter->setRenderHint(QPainter::Antialiasing);
     QPolygonF polygon;
     polygon.append(QPointF(0,-size/2));polygon.append(QPointF(-size/8,-size/8));
     polygon.append(QPointF(-size/2,0));polygon.append(QPointF(-size/8,size/8));

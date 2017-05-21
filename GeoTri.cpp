@@ -1,7 +1,7 @@
 #include "GeoTri.h"
 
 GeoTri::GeoTri(QPointF world, int size, QColor pen, QColor brush) :
-    Geometry(iGeoTri, LineNull, 1, size*0.6, pen, brush)
+    Geometry(iGeoTri, LineNull, size*0.6, pen, brush)
 {
     list.append(world);
     checkRect();
@@ -27,6 +27,7 @@ void GeoTri::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget 
 {
     painter->setPen(pen);
     painter->setBrush(brush);
+    painter->setRenderHint(QPainter::Antialiasing);
     QPolygonF polygon;
     polygon.append(QPointF(0,-size/2));
     polygon.append(QPointF(-size/2,size/2));
