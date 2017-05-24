@@ -61,6 +61,7 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
 //        tempLayer->addItem(&tt);
 
 
+
 }
 
 ILong::~ILong()

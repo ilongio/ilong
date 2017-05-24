@@ -25,7 +25,6 @@ public:
         QString label;
         QList<QPointF> list;
         int width;
-        ILongLineType lineDir;
         int size;
         QColor pen;
         QColor brush;
@@ -43,6 +42,8 @@ public:
      * */
     Layer(ILong * parent, QString id, QString name, bool visible, bool selectable);
     ~Layer();
+    QSqlQuery * searchInfo(QString field, QString text);
+    void setViewToItem(QString itemID);
     void addItem(QList<Geometry::ILongDataType> * dataList);
     QList<Geometry *> *getItems();
     void removeItem(Geometry *item);

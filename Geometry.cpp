@@ -1,9 +1,8 @@
 #include "Geometry.h"
 
-Geometry::Geometry(ILongGeoType gType, ILongLineType lType, quint8 lWidth,QColor iPen,QColor iBrush)
+Geometry::Geometry(ILongGeoType gType, quint8 lWidth, QColor iPen, QColor iBrush)
 {
     geoType = gType;
-    lineType = lType;
     if(gType == iGeoPolygon)
         lineWidth = lWidth;
     else
@@ -29,11 +28,6 @@ ILongGeoRect Geometry::getRect()
 ILongGeoType Geometry::getGeoType()
 {
     return geoType;
-}
-
-ILongLineType Geometry::getLineType()
-{
-    return lineType;
 }
 
 QPointF Geometry::getCenter()

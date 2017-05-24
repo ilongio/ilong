@@ -1,7 +1,7 @@
 #include "GeoPolygon.h"
 
-GeoPolygon::GeoPolygon(ILong *iL, QList<QPointF> * pointList, bool closePath, quint8 lineWidth, ILongLineType lType, QColor pen, QColor brush) :
-    Geometry(iGeoPolygon, lType, lineWidth, pen, brush),iLong(iL)
+GeoPolygon::GeoPolygon(ILong *iL, QList<QPointF> * pointList, bool closePath, quint8 lineWidth, QColor pen, QColor brush) :
+    Geometry(iGeoPolygon,lineWidth, pen, brush),iLong(iL)
 {
     closeFlag = closePath;
     if(pointList->size() == 0)

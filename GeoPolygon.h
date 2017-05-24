@@ -11,7 +11,7 @@ class ILONGSHARED_EXPORT GeoPolygon : public Geometry
 {
     Q_OBJECT
 public:
-    explicit GeoPolygon(ILong *iL, QList<QPointF> *pointList, bool closePath = false, quint8 lineWidth = 1, ILongLineType lType = LineNull, QColor pen = QColor(Qt::red), QColor brush = QColor(Qt::yellow));
+    explicit GeoPolygon(ILong *iL, QList<QPointF> *pointList, bool closePath = false, quint8 lineWidth = 1, QColor pen = QColor(Qt::red), QColor brush = QColor(Qt::yellow));
 protected:
     QRectF boundingRect() const Q_DECL_OVERRIDE;
     QPainterPath shape();

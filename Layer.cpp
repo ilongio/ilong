@@ -42,6 +42,46 @@ Layer::~Layer()
     sqlExcute->removeLayer(layerID);
 }
 
+QSqlQuery *Layer::searchInfo(QString field, QString text)
+{
+    ILongType t = ILongTEXT;
+    for(int i=0; i<headType.size();i++)
+    {
+        if(headType.at(i).name == field)
+        {
+            t = headType.at(i).type;
+            break;
+        }
+    }
+    if(t == ILongNUMBER)
+    {
+        bool ok;
+        text.toDouble(&ok);
+        if(!ok)
+            return nullptr;
+    }
+    return sqlExcute->searchInfo(layerID,field,t,text);
+}
+
+void Layer::setViewToItem(QString itemID)
+{
+    QSqlQuery * query = sqlExcute->setViewToItem(getLayerID(),itemID);
+    while(query->next())
+    {
+        bool ok;
+        double x = query->value(0).toDouble(&ok);
+        if(!ok)
+            break;
+        double y = query->value(1).toDouble(&ok);
+        if(!ok)
+            break;
+        iLong->zoomTo(QPointF(x,y),iLong->zoomLevel());
+        break;
+    }
+    delete query;
+    query = 0;
+}
+
 void Layer::addItem(QList<Geometry::ILongDataType> *dataList)
 {
     sqlExcute->addItems(dataList,layerID, &headType);
@@ -200,14 +240,13 @@ Layer::ILongInfo Layer::getInfo(QSqlQuery *query)
     QStringList gis = query->value(9).toString().split('-');
     info.list = getGisList(gis.at(0));
     info.width = gis.at(1).toInt();
-    info.lineDir = (ILongLineType)gis.at(2).toInt();
-    info.size = gis.at(3).toInt();
-    QStringList iPen = gis.at(4).split('_');
+    info.size = gis.at(2).toInt();
+    QStringList iPen = gis.at(3).split('_');
     info.pen = QColor(iPen.at(0).toInt(),iPen.at(1).toInt(),iPen.at(2).toInt());
-    iPen = gis.at(5).split('_');
+    iPen = gis.at(4).split('_');
     info.brush = QColor(iPen.at(0).toInt(),iPen.at(1).toInt(),iPen.at(2).toInt());
-    info.dir = gis.at(6).toInt();
-    info.close = gis.at(7).toInt();
+    info.dir = gis.at(5).toInt();
+    info.close = gis.at(6).toInt();
     return info;
 }
 
@@ -336,7 +375,7 @@ void Layer::addGeoTri(QSqlQuery *query)
 void Layer::addPolygon(QSqlQuery *query)
 {
     ILongInfo itemInfo = getInfo(query);
-    GeoPolygon * p = new GeoPolygon(iLong,&itemInfo.list,itemInfo.close,itemInfo.width,itemInfo.lineDir,itemInfo.pen,itemInfo.brush);
+    GeoPolygon * p = new GeoPolygon(iLong,&itemInfo.list,itemInfo.close,itemInfo.width,itemInfo.pen,itemInfo.brush);
     p->setPos(iLong->worldToScene(QPointF(p->getRect().minX,p->getRect().maxY)));
     if(itemInfo.label != "ILONGNULL")
         p->setLabel(itemInfo.label);

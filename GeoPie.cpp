@@ -2,7 +2,7 @@
 #include <math.h>
 
 GeoPie::GeoPie(QPointF world, int size, int dir, QColor pen, QColor brush) :
-    Geometry(iGeoPie, LineNull, size, pen, brush)
+    Geometry(iGeoPie, size, pen, brush)
 {
     list.append(world);
     this->dir = dir;

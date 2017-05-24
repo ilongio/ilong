@@ -45,16 +45,6 @@ typedef enum
     //面类图元
     iGeoPolygon
 } ILongGeoType;
-/*
- * 面类图元线类型,是有箭头和没箭头
- * */
-typedef enum
-{
-    LineNull,   //没箭头
-    LineStart,  //开始有箭头
-    LineEnd,    //结束有箭头
-    LineBoth,   //双箭头
-} ILongLineType;
 //保存图元的边界
 typedef struct
 {

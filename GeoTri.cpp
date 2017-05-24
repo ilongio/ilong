@@ -1,7 +1,7 @@
 #include "GeoTri.h"
 
 GeoTri::GeoTri(QPointF world, int size, QColor pen, QColor brush) :
-    Geometry(iGeoTri, LineNull, size*0.6, pen, brush)
+    Geometry(iGeoTri, size*0.6, pen, brush)
 {
     list.append(world);
     checkRect();

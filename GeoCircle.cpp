@@ -1,7 +1,7 @@
 #include "GeoCircle.h"
 
 GeoCircle::GeoCircle(QPointF world, int size,  QColor pen, QColor brush) :
-    Geometry(iGeoCircle, LineNull, size*0.6, pen, brush)
+    Geometry(iGeoCircle, size*0.6, pen, brush)
 {
     list.append(world);
     checkRect();

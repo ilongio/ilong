@@ -92,15 +92,15 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
          * @MAXY        图元最大wgs Y坐标 (点类图元写CenterY相同) 设计两个坐标点只为了非点类图元需要计算边界问题,比如线
          * @LABEL       用来显示图标注的, 如果设置显示标注,就从数据表里面把标注内容填充到该字段
          * @INFO        保存图元GIS信息
-         *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-线宽-箭头方向-大小-画笔(R_G_B)-画刷(R_G_B)-旋转角度-闭环
-         *              箭头方向 闭环    只对面类图元有影响 闭环(如果true 就是多边行, false 就是多段线)
+         *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-线宽-大小-画笔(R_G_B)-画刷(R_G_B)-旋转角度-闭环
+         *              线宽 闭环       只对面类图元有影响 闭环(如果true 就是多边行, false 就是多段线)
          *              旋转角度 大小    只对点类图元有影响
          *
         */
         QPointF cen = data.geometry->getCenter();
         ILongGeoRect rect = data.geometry->getRect();
-        QString info = QString("%1-%2-%3-%4-%5-%6-%7-%8").arg(data.geometry->getPoints())
-                .arg(data.geometry->getLineWidth()).arg(data.geometry->getLineType())
+        QString info = QString("%1-%2-%3-%4-%5-%6-%7").arg(data.geometry->getPoints())
+                .arg(data.geometry->getLineWidth())
                 .arg(data.geometry->getSize()).arg(data.geometry->getPen()).arg(data.geometry->getBrush())
                 .arg(data.geometry->getDir()).arg(data.geometry->getCloseFlag());
         sql = QString("INSERT INTO '%1INFO' VALUES ( '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', '%10', '%11' )")
@@ -222,8 +222,8 @@ void SQLExcute::initLayer(QString id, QString name, QList<LayerFormat> * typeLis
      * @MAXY        图元最大wgs Y坐标 (点类图元写CenterY相同) 设计两个坐标点只为了非点类图元需要计算边界问题,比如线
      * @LABEL       用来显示图标注的, 如果设置显示标注,就从数据表里面把标注内容填充到该字段
      * @INFO        保存图元GIS信息
-     *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-线宽-箭头方向-大小-画笔(R_G_B)-画刷(R_G_B)-旋转角度-闭环
-     *              箭头方向 闭环    只对面类图元有影响 闭环(如果true 就是多边行, false 就是多段线)
+     *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-线宽-大小-画笔(R_G_B)-画刷(R_G_B)-旋转角度-闭环
+     *              线宽 闭环       只对面类图元有影响 闭环(如果true 就是多边行, false 就是多段线)
      *              旋转角度 大小    只对点类图元有影响
      *
     */
@@ -236,6 +236,22 @@ QSqlQuery *SQLExcute::getItemInfo(QString itemLayerID, QString itemID)
 {
     QString sql = QString("SELECT * FROM '%1' WHERE ILONGID = '%2'").arg(itemLayerID).arg(itemID);
     return getResult(sql,"getItemInfo");
+}
+
+QSqlQuery *SQLExcute::searchInfo(QString itemLayerID, QString field, ILongType fieldType, QString text)
+{
+    QString sql;
+    if(fieldType == ILongNUMBER)
+        sql = QString("SELECT * FROM '%1' WHERE %2 = %3").arg(itemLayerID).arg(field).arg(text);
+    else
+        sql = QString("SELECT * FROM '%1' WHERE %2 like '%%3%'").arg(itemLayerID).arg(field).arg(text);
+    return getResult(sql,"searchInfo");
+}
+
+QSqlQuery *SQLExcute::setViewToItem(QString layerID, QString itemID)
+{
+    QString sql = QString("SELECT CenterX,CenterY FROM '%1INFO' WHERE ILONGID = '%2'").arg(layerID).arg(itemID);
+    return getResult(sql,"setViewToItem");
 }
 
 void SQLExcute::removeLayer(QString id)

@@ -1,7 +1,7 @@
 #include "GeoStar.h"
 
 GeoStar::GeoStar(QPointF world, int size, QColor pen, QColor brush) :
-    Geometry(iGeoStar, LineNull, size*0.8, pen, brush)
+    Geometry(iGeoStar, size*0.8, pen, brush)
 {
     list.append(world);
     checkRect();

@@ -1,6 +1,6 @@
 #include "GeoMouse.h"
 
-GeoMouse::GeoMouse(QPointF world, quint32 gsize): Geometry(iGeoMouse, LineNull, gsize * 0.3,
+GeoMouse::GeoMouse(QPointF world, quint32 gsize): Geometry(iGeoMouse, gsize * 0.3,
                                                    QColor(qrand() % 256, qrand() % 256, qrand() % 256),
                                                    QColor(qrand() % 256, qrand() % 256, qrand() % 256))
 {

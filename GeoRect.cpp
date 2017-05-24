@@ -1,7 +1,7 @@
 #include "GeoRect.h"
 
 GeoRect::GeoRect(QPointF world, int size, QColor pen, QColor brush) :
-  Geometry(iGeoRect, LineNull,  size*0.6, pen, brush)
+  Geometry(iGeoRect,  size*0.6, pen, brush)
 {
     list.append(world);
     checkRect();
