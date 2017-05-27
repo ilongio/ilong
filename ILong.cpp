@@ -126,6 +126,11 @@ Layer *ILong::getlayer(QString name) const
     return manager->getLayer(name);
 }
 
+Layer *ILong::getLayerByID(QString ID) const
+{
+    return manager->getLayerByID(ID);
+}
+
 Layer *ILong::addLayer(QString name, QList<LayerFormat> *typeList) const
 {
     if(!typeList->size())
@@ -185,29 +190,18 @@ bool ILong::viewportEvent(QEvent *event)
     case QEvent::MouseButtonPress:
     {
         QMouseEvent * pressEvent = static_cast<QMouseEvent *>(event);
+        pressEvent->accept();
         if(pressEvent->buttons() & Qt::LeftButton)
         {
             zoomOnPos = pressEvent->pos();
             mouseMove = false;
+
             QPointF point = mapToScene(pressEvent->pos());
             if (scene()->items(point).count() != 0)
             {
-                SelectInfo info(this);
-                Geometry * item;
                 QList<QGraphicsItem *> l = scene()->items(point);
-                for(int i=0; i< l.count(); i++)
-                {
-                    item = (Geometry *)l.at(i);
-                    if(item->objectName().isEmpty())
-                        continue;
-                    QStringList nameList = item->objectName().split('_');
-                    info.getModel()->setItem(i,0,new QStandardItem(manager->getLayerByID(nameList.at(0))->getLayerName()));
-                    info.getModel()->setItem(i,1,new QStandardItem(nameList.at(1)));
-                    info.getModel()->setItem(i,2,new QStandardItem(item->getLabel()));
-                }
-                info.exec();
+                emit sendItemList(l);
             }
-            pressEvent->accept();
         }
         return true;
     }

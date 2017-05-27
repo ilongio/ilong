@@ -26,8 +26,6 @@
 #include "GeoStar.h"
 #include "GeoTri.h"
 #include "GeoPolygon.h"
-#include "SelectInfo.h"
-#include "ItemInfo.h"
 
 /*
  * 提供简单的跨平台的瓦片图层框架功能,反正不会C++,更不会面向对象,用来练手的!
@@ -35,7 +33,6 @@
 
 class Network;
 class Manager;
-class ItemInfo;
 class GeoPolygon;
 
 class ILONGSHARED_EXPORT ILong : public QGraphicsView
@@ -85,6 +82,7 @@ public:
      * */
     QList<Layer *> getLayers() const;
     Layer * getlayer(QString name) const;
+    Layer * getLayerByID(QString ID) const;
     /*
      * 新增图层
      * @name     图层名称
@@ -236,6 +234,7 @@ signals:
     void downloadImage();
     void sendLocationPos(QPointF);
     void doubleClicked(QPoint);
+    void sendItemList(QList<QGraphicsItem *>);
 public slots:
     void viewChangedSlot();
     void newImage();

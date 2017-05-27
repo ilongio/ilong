@@ -22,8 +22,6 @@ SOURCES += ILong.cpp \
     Geometry.cpp \
     GeoMouse.cpp \
     GeoPie.cpp \
-    SelectInfo.cpp \
-    ItemInfo.cpp \
     GeoRect.cpp \
     GeoCircle.cpp \
     GeoStar.cpp \
@@ -41,8 +39,6 @@ HEADERS += ILong.h\
     Geometry.h \
     GeoMouse.h \
     GeoPie.h \
-    SelectInfo.h \
-    ItemInfo.h \
     GeoRect.h \
     GeoCircle.h \
     GeoStar.h \
@@ -54,6 +50,4 @@ unix {
     INSTALLS += target
 }
 
-FORMS += \
-    SelectInfo.ui \
-    ItemInfo.ui
+FORMS +=
