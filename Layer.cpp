@@ -1,7 +1,7 @@
 #include "Layer.h"
 
 Layer::Layer(ILong *parent, QString name, QList<LayerFormat> *typeList) : iLong(parent),
-    layerLabel(name),visible(true),selectable(true),sqlExcute(&parent->sqlExcute)
+    layerLabel(name),visible(true),selectable(false),sqlExcute(&parent->sqlExcute)
 {
     /*
      * 这是直接创建新图层并写入数据库
@@ -154,30 +154,58 @@ void Layer::updatLayer()
     while(query->next())
     {
         int type = query->value(1).toInt();
+        Geometry * g = nullptr;
+        ILongInfo itemInfo = getInfo(query);
         switch (type) {
         case iGeoCircle:
-            addGeoCircle(query);
+            //addGeoCircle(query);
+            g = new GeoCircle(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
             break;
         case iGeoRect:
-            addGeoRect(query);
+            g = new GeoRect(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
+            //addGeoRect(query);
             break;
         case iGeoMouse:
-            addGeoMouse(query);
+            g = new GeoMouse(itemInfo.center);
+            //addGeoMouse(query);
             break;
         case iGeoPie:
-            addGeoPie(query);
+            g = new GeoPie(itemInfo.center,itemInfo.size,itemInfo.dir,itemInfo.pen,itemInfo.brush);
+            //addGeoPie(query);
             break;
         case iGeoStar:
-            addGeoStar(query);
+            g = new GeoStar(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
+            //addGeoStar(query);
             break;
         case iGeoTri:
-            addGeoTri(query);
+            g = new GeoTri(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
+            //addGeoTri(query);
             break;
         case iGeoPolygon:
-            addPolygon(query);
+            g = new GeoPolygon(iLong,&itemInfo.list,itemInfo.close,itemInfo.width,itemInfo.pen,itemInfo.brush);
+            //addPolygon(query);
             break;
         default:
             break;
+        }
+        if(g)
+        {
+            if(type == iGeoPolygon)
+            {
+                g->setPos(iLong->worldToScene(QPointF(g->getRect().minX,g->getRect().maxY)));
+                //g->setFlag(QGraphicsItem::ItemIsSelectable);
+            }
+            else
+            {
+                g->setPos(iLong->worldToScene(itemInfo.center));
+                g->setScale(iLong->itemScale);
+                g->rotate(itemInfo.dir);
+            }
+            if(itemInfo.label != "ILONGNULL")
+                g->setLabel(itemInfo.label);
+            g->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
+            iLong->scene()->addItem(g);
+            list.append(g);
         }
     }
     delete query;
@@ -264,123 +292,3 @@ QList<QPointF> Layer::getGisList(QString gis)
     return l;
 }
 
-void Layer::addGeoCircle(QSqlQuery *query)
-{
-    ILongInfo itemInfo = getInfo(query);
-    GeoCircle * p = new GeoCircle(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
-    p->setPos(iLong->worldToScene(itemInfo.center));
-    if(itemInfo.label != "ILONGNULL")
-        p->setLabel(itemInfo.label);
-    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
-    p->setScale(iLong->itemScale);
-    p->rotate(itemInfo.dir);
-    p->setFlag(QGraphicsItem::ItemIsFocusable);
-    iLong->scene()->addItem(p);
-    list.append(p);
-}
-
-void Layer::addGeoPie(QSqlQuery *query)
-{
-    /*
-     *创建信息表,专用保存图元的,应该可以直接保存图元,但是现在还不知道怎么弄,就先这样弄吧,以后再想办法改进(个人技术原因),主要信息有:
-     * @ILONGID  0   与数据的ID关联;
-     * @TYPE     1   ILongGeoType 枚举图元类型
-     * @CenterX  2   图元wgs CenterX 坐标
-     * @CenterY  3   图元wgs CenterX 坐标
-     * @MINX     4   图元最小wgs X坐标 (点类图元写CenterX相同)
-     * @MINY     5   图元最小wgs X坐标 (点类图元写CenterY相同)
-     * @MAXX     6   图元最大wgs X坐标 (点类图元写CenterX相同)
-     * @MAXY     7   图元最大wgs Y坐标 (点类图元写CenterY相同) 设计两个坐标点只为了非点类图元需要计算边界问题,比如线
-     * @LABEL    8   用来显示图标注的, 如果设置显示标注,就从数据表里面把标注内容填充到该字段
-     * @INFO     9   保存图元GIS信息
-     * 格式: 0WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-1线宽-2箭头方向-3大小-4画笔(R_G_B)-5画刷(R_G_B)-6旋转角度-7闭环
-     *              箭头方向 闭环    只对面类图元有影响 闭环(如果true 就是多边行, false 就是多段线)
-     *              旋转角度 大小    只对点类图元有影响
-     *
-    */
-    ILongInfo itemInfo = getInfo(query);
-    GeoPie * p = new GeoPie(itemInfo.center,itemInfo.size,itemInfo.dir,itemInfo.pen,itemInfo.brush);
-    p->setPos(iLong->worldToScene(itemInfo.center));
-    if(itemInfo.label != "ILONGNULL")
-        p->setLabel(itemInfo.label);
-    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
-    p->setScale(iLong->itemScale);
-    p->rotate(itemInfo.dir);
-    p->setFlag(QGraphicsItem::ItemIsFocusable);
-    iLong->scene()->addItem(p);
-    list.append(p);
-
-}
-
-void Layer::addGeoMouse(QSqlQuery *query)
-{
-    ILongInfo itemInfo = getInfo(query);
-    GeoMouse * p = new GeoMouse(itemInfo.center);
-    p->setPos(iLong->worldToScene(itemInfo.center));
-    if(itemInfo.label != "ILONGNULL")
-        p->setLabel(itemInfo.label);
-    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
-    p->setScale(iLong->itemScale);
-    p->rotate(itemInfo.dir);
-    p->setFlag(QGraphicsItem::ItemIsFocusable);
-    iLong->scene()->addItem(p);
-    list.append(p);
-}
-
-void Layer::addGeoRect(QSqlQuery *query)
-{
-    ILongInfo itemInfo = getInfo(query);
-    GeoRect * p = new GeoRect(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
-    p->setPos(iLong->worldToScene(itemInfo.center));
-    if(itemInfo.label != "ILONGNULL")
-        p->setLabel(itemInfo.label);
-    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
-    p->setScale(iLong->itemScale);
-    p->rotate(itemInfo.dir);
-    p->setFlag(QGraphicsItem::ItemIsFocusable);
-    iLong->scene()->addItem(p);
-    list.append(p);
-}
-
-void Layer::addGeoStar(QSqlQuery *query)
-{
-    ILongInfo itemInfo = getInfo(query);
-    GeoStar * p = new GeoStar(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
-    p->setPos(iLong->worldToScene(itemInfo.center));
-    if(itemInfo.label != "ILONGNULL")
-        p->setLabel(itemInfo.label);
-    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
-    p->setScale(iLong->itemScale);
-    p->rotate(itemInfo.dir);
-    p->setFlag(QGraphicsItem::ItemIsFocusable);
-    iLong->scene()->addItem(p);
-    list.append(p);
-}
-
-void Layer::addGeoTri(QSqlQuery *query)
-{
-    ILongInfo itemInfo = getInfo(query);
-    GeoTri * p = new GeoTri(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
-    p->setPos(iLong->worldToScene(itemInfo.center));
-    if(itemInfo.label != "ILONGNULL")
-        p->setLabel(itemInfo.label);
-    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
-    p->setScale(iLong->itemScale);
-    p->rotate(itemInfo.dir);
-    p->setFlag(QGraphicsItem::ItemIsFocusable);
-    iLong->scene()->addItem(p);
-    list.append(p);
-}
-
-void Layer::addPolygon(QSqlQuery *query)
-{
-    ILongInfo itemInfo = getInfo(query);
-    GeoPolygon * p = new GeoPolygon(iLong,&itemInfo.list,itemInfo.close,itemInfo.width,itemInfo.pen,itemInfo.brush);
-    p->setPos(iLong->worldToScene(QPointF(p->getRect().minX,p->getRect().maxY)));
-    if(itemInfo.label != "ILONGNULL")
-        p->setLabel(itemInfo.label);
-    p->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
-    p->setFlag(QGraphicsItem::ItemIsFocusable);
-    iLong->scene()->addItem(p);
-    list.append(p);
-}

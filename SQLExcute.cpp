@@ -192,7 +192,7 @@ void SQLExcute::initLayer(QString id, QString name, QList<LayerFormat> * typeLis
      * 一个表保存数据(数据表)
      * 一个表保存图元信息(信息表)
     */
-    QString sql = QString("INSERT INTO ILONGIOLAYER VALUES ( '%1', '%2', '%3', '%4' )").arg(id).arg(name).arg(1).arg(1);
+    QString sql = QString("INSERT INTO ILONGIOLAYER VALUES ( '%1', '%2', '%3', '%4' )").arg(id).arg(name).arg(1).arg(0);
     nonResult(sql, "initLayer1");
     /*
      * 读取表数据结构 并创建表 把结构保存在字段类型headType里,方便插入图元数据使用
@@ -274,15 +274,13 @@ void SQLExcute::clearLayer(QString id)
 
 void SQLExcute::setLayerVisible(QString id, bool b)
 {
-    int result = b ? 1 : 0;
-    QString sql = QString("UPDATE ILONGIOLAYER SET VISIBLE = '%1' WHERE ID = '%2' ").arg(result).arg(id);
+    QString sql = QString("UPDATE ILONGIOLAYER SET VISIBLE = '%1' WHERE ID = '%2' ").arg(b).arg(id);
     nonResult(sql, "setLayerVisible " + id);
 }
 
 void SQLExcute::setLayerSelectable(QString id, bool b)
 {
-    int result = b ? 1 : 0;
-    QString sql = QString("UPDATE ILONGIOLAYER SET SELECTABLE = '%1' WHERE ID = '%2' ").arg(result).arg(id);
+    QString sql = QString("UPDATE ILONGIOLAYER SET SELECTABLE = '%1' WHERE ID = '%2' ").arg(b).arg(id);
     nonResult(sql, "setLayerVisible " + id);
 }
 

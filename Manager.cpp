@@ -9,7 +9,7 @@ Manager::Manager(ILong *parent) : QObject(parent),iLong(parent),sqlExcute(&paren
         QString name = query->value(1).toString();
         int visible = query->value(2).toInt();
         int selectable = query->value(3).toInt();
-        loadLayer(id,name,visible ? true : false, selectable ? true : false);
+        loadLayer(id,name,visible, selectable);
     }
     delete query;
     query = 0;
@@ -85,7 +85,8 @@ void Manager::updatLayer()
     iLong->scene()->clear();
     for(int i=0; i<list.size(); i++)
     {
-        list.at(i)->updatLayer();
+        if(list.at(i)->isVisible())
+            list.at(i)->updatLayer();
     }
 }
 

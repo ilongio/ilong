@@ -200,6 +200,20 @@ bool ILong::viewportEvent(QEvent *event)
             if (scene()->items(point).count() != 0)
             {
                 QList<QGraphicsItem *> l = scene()->items(point);
+                for(int i= l.size() - 1; i>=0; i--)
+                {
+                    Geometry * g = (Geometry *)l.at(i);
+                    QStringList nameList = g->objectName().split('_');
+                    if(g->objectName().isEmpty() || nameList.size() != 2)
+                    {
+                        l.removeOne(l.at(i));
+                        continue;
+                    }
+                    Layer * layer = manager->getLayerByID(nameList.at(0));
+                    if(!layer->isSelectable() && g->getGeoType() == iGeoPolygon)
+                        l.removeOne(l.at(i));
+
+                }
                 emit sendItemList(l);
             }
         }
