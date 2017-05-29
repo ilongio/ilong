@@ -53,6 +53,7 @@ public:
     QSqlQuery * getItemInfo(QString itemLayerID, QString itemID);
     QSqlQuery * searchInfo(QString itemLayerID, QString field, ILongType fieldType,QString text);
     QSqlQuery * setViewToItem(QString layerID,QString itemID);
+    void closeDB();
     /*
      * 删除图层,@id可以通过图层获得
      */

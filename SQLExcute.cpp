@@ -254,6 +254,17 @@ QSqlQuery *SQLExcute::setViewToItem(QString layerID, QString itemID)
     return getResult(sql,"setViewToItem");
 }
 
+void SQLExcute::closeDB()
+{
+    QSqlDatabase db;
+    if(QSqlDatabase::contains("qt_sql_default_connection"))
+      db = QSqlDatabase::database("qt_sql_default_connection");
+    else
+      db = QSqlDatabase::addDatabase("QSQLITE");
+    if(db.isOpen())
+        db.close();
+}
+
 void SQLExcute::removeLayer(QString id)
 {
     QString sql = QString("DELETE FROM ILONGIOLAYER WHERE ID = '%1' ").arg(id);

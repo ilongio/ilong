@@ -4,7 +4,7 @@
 ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     currentLevel(DEFAULTZOOMLEVEL),numberOfTiles(tilesOnZoomLevel(currentLevel)),
     defaultLocation(DEFAULTLOCATION),net(new Network(this)),
-    tilesCount(0),currentPos(DEFAULTLOCATION),itemLimit(200),
+    tilesCount(0),currentPos(DEFAULTLOCATION),itemLimit(DEFAULTITEMLIMITPERLAYER),
     satellitesCount(0),GPSAltitude(0),GPSDir(0)
 {
     distanceList<<5000000<<2000000<<1000000<<1000000<<1000000<<100000<<100000<<50000<<50000<<10000<<10000<<10000<<1000<<1000<<500<<200<<100<<50<<25;
@@ -33,6 +33,9 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     connect(this,SIGNAL(downloadImage()),net,SLOT(start()));
     connect(net,SIGNAL(newImage()),this,SLOT(newImage()));
     connect(net,SIGNAL(sendTileCount(int)),this, SLOT(updateTilesCount(int)));
+
+    manager->moveToThread(&updateThread);
+    connect(this, SIGNAL(updateLayer()), manager, SLOT(updatLayer()));
     /*
      * 处理当前世界坐标位置信号
      * */
@@ -68,6 +71,9 @@ ILong::~ILong()
 {
     networkThread.exit(0);
     while(networkThread.isRunning())
+        this->thread()->usleep(100);
+    updateThread.exit(0);
+    while(updateThread.isRunning())
         this->thread()->usleep(100);
 }
 
@@ -227,12 +233,13 @@ bool ILong::viewportEvent(QEvent *event)
         {
 
             QPoint moveDelta = moveEvent->pos() - zoomOnPos;
+            scene()->clear();
             setSceneLocation(QPointF(sceneRect().x() - moveDelta.x(),sceneRect().y() - moveDelta.y()));
             backgroundPos = backgroundPos + moveDelta;
             zoomOnPos = moveEvent->pos();
             mouseMove = true;
             moveEvent->accept();
-            }
+        }
         return true;
     }
     case QEvent::MouseButtonRelease:
@@ -464,11 +471,20 @@ bool ILong::checkWorldCoordinate(QPointF world)
     return (world.x() >= -180 && world.x() <= 180 && world.y() >= -85 && world.y() <= 85);
 }
 
+void ILong::addGeoToScene(Geometry *g)
+{
+    if(g)
+        scene()->addItem(g);
+}
+
 void ILong::viewChangedSlot()
 {
-    scene()->clear();
+    //scene()->clear();
+    manager->stopUpdateLayer();
     tilesUrlMatrix();
-    manager->updatLayer();
+    if(!updateThread.isRunning())
+        updateThread.start();
+    emit updateLayer();
 }
 
 void ILong::newImage()

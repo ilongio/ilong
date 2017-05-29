@@ -1,6 +1,6 @@
 #include "Manager.h"
 
-Manager::Manager(ILong *parent) : QObject(parent),iLong(parent),sqlExcute(&parent->sqlExcute)
+Manager::Manager(ILong *iL, QObject *parent) : QObject(parent),iLong(iL),sqlExcute(&iL->sqlExcute)
 {
     QSqlQuery * query = sqlExcute->initLayerManager();
     while(query->next())
@@ -80,14 +80,24 @@ void Manager::removeLayer(QString name)
 
 }
 
+void Manager::stopUpdateLayer()
+{
+    isUpdate = false;
+    iLong->scene()->clear();
+}
+
 void Manager::updatLayer()
 {
-    iLong->scene()->clear();
-    for(int i=0; i<list.size(); i++)
+    isUpdate = true;
+    //iLong->scene()->clear();
+    for(int i=0; i<list.size() && isUpdate; i++)
     {
-        if(list.at(i)->isVisible())
-            list.at(i)->updatLayer();
+        if(list.at(i)->isVisible() && isUpdate)
+        {
+            list.at(i)->updatLayer(&isUpdate);
+        }
     }
+    //this->thread()->exit();
 }
 
 QString Manager::checkLayerName(QString name)

@@ -49,7 +49,7 @@ public:
     void removeItem(Geometry *item);
     void addTempItem(ILongGeoType type, QPointF world, quint32 dir = 0);
     void updateTempItem(quint32 dir = 0);
-    void updatLayer();
+    void updatLayer(bool * isUpdate);
     void setLabel(QString field = "ILONGNULL");
     /*
      * 返回图层名称
@@ -92,7 +92,7 @@ private:
     QPointF tempGeoWorldPos;
     ILongGeoType tempGeoType;
 signals:
-
+    void addGeoToScene(Geometry *);
 public slots:
 };
 

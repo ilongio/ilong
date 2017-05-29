@@ -18,7 +18,7 @@ class ILONGSHARED_EXPORT Manager : public QObject
 {
     Q_OBJECT
 public:
-    explicit Manager(ILong *parent);
+    explicit Manager(ILong *iL, QObject * parent = 0);
     /*
      * 返回所有图层的指针
      * */
@@ -34,7 +34,7 @@ public:
     Layer *getLayer(QString name);
     Layer *getLayerByID(QString id);
     void removeLayer(QString name);
-    void updatLayer();
+    void stopUpdateLayer();
 private:
     /*
      * 检查图层名称@name是否在图层管理表里,如果有,就自动在@name后面加*号,暂时这样处理导入多个同名图层
@@ -50,9 +50,11 @@ private:
      * */
     QList<Layer *> list;
     SQLExcute * sqlExcute;
+    bool isUpdate;
 signals:
 
 public slots:
+    void updatLayer();
 };
 
 #endif // MANAGER_H

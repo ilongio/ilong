@@ -13,6 +13,7 @@ Layer::Layer(ILong *parent, QString name, QList<LayerFormat> *typeList) : iLong(
     f.type = ILongNUMBER;
     headType.append(f);
     sqlExcute->initLayer(layerID,layerLabel,typeList, &headType);
+    connect(this, SIGNAL(addGeoToScene(Geometry*)), iLong, SLOT(addGeoToScene(Geometry*)));
 }
 
 Layer::Layer(ILong * parent,QString id, QString name, bool visible, bool selectable):
@@ -35,6 +36,7 @@ Layer::Layer(ILong * parent,QString id, QString name, bool visible, bool selecta
     }
     delete query;
     query = 0;
+    connect(this, SIGNAL(addGeoToScene(Geometry*)), iLong, SLOT(addGeoToScene(Geometry*)));
 }
 
 Layer::~Layer()
@@ -139,56 +141,52 @@ void Layer::updateTempItem(quint32 dir)
         tempGeo->setPos(iLong->worldToScene(tempGeoWorldPos));
         tempGeo->setScale(iLong->itemScale);
         tempGeo->rotate(dir);
-        iLong->scene()->addItem(tempGeo);
+        //iLong->scene()->addItem(tempGeo);
+        emit addGeoToScene(tempGeo);
     }
 }
 
-void Layer::updatLayer()
+void Layer::updatLayer(bool *isUpdate)
 {
     list.clear();
     tempGeo = nullptr;
+    if(!*isUpdate)
+        return;
     QPointF leftTop = iLong->sceneToWorld(iLong->mapToScene(QPoint(0,0)));
     QPointF rightBottom = iLong->sceneToWorld(iLong->mapToScene(QPoint(iLong->viewport()->width(),
                                                                        iLong->viewport()->height())));
     QSqlQuery * query =sqlExcute->updateLayer(layerID,leftTop,rightBottom, iLong->getItemLimit());
-    while(query->next())
+    while(query->next() && *isUpdate)
     {
         int type = query->value(1).toInt();
         Geometry * g = nullptr;
         ILongInfo itemInfo = getInfo(query);
         switch (type) {
         case iGeoCircle:
-            //addGeoCircle(query);
             g = new GeoCircle(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
             break;
         case iGeoRect:
             g = new GeoRect(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
-            //addGeoRect(query);
             break;
         case iGeoMouse:
             g = new GeoMouse(itemInfo.center);
-            //addGeoMouse(query);
             break;
         case iGeoPie:
             g = new GeoPie(itemInfo.center,itemInfo.size,itemInfo.dir,itemInfo.pen,itemInfo.brush);
-            //addGeoPie(query);
             break;
         case iGeoStar:
             g = new GeoStar(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
-            //addGeoStar(query);
             break;
         case iGeoTri:
             g = new GeoTri(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
-            //addGeoTri(query);
             break;
         case iGeoPolygon:
             g = new GeoPolygon(iLong,&itemInfo.list,itemInfo.close,itemInfo.width,itemInfo.pen,itemInfo.brush);
-            //addPolygon(query);
             break;
         default:
             break;
         }
-        if(g)
+        if(g && *isUpdate)
         {
             if(type == iGeoPolygon)
             {
@@ -204,13 +202,14 @@ void Layer::updatLayer()
             if(itemInfo.label != "ILONGNULL")
                 g->setLabel(itemInfo.label);
             g->setObjectName(QString("%1_%2").arg(layerID).arg(itemInfo.id));
-            iLong->scene()->addItem(g);
+            //iLong->scene()->addItem(g);
+            emit addGeoToScene(g);
             list.append(g);
         }
     }
     delete query;
     query = 0;
-    updateTempItem();
+    //updateTempItem();
 }
 
 void Layer::setLabel(QString field)

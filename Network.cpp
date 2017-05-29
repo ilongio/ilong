@@ -69,7 +69,7 @@ void Network::start()
         return;
     }
     isDownloading  = false;
-    this->thread()->exit();
+    //this->thread()->exit();
 }
 
 void Network::requestFinished(QNetworkReply *reply)

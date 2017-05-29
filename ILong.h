@@ -101,7 +101,7 @@ public:
     /*
      * 设置或返回一个图层的最大图元个数@limit, 一个图层图元太多意义不大
      * */
-    void setItemLimit(quint32 limit = 1000);
+    void setItemLimit(quint32 limit = DEFAULTITEMLIMITPERLAYER);
     quint32 getItemLimit();
 
 protected:
@@ -197,6 +197,7 @@ private:
      * 下载瓦片线程
      * */
     QThread  networkThread;
+    QThread  updateThread;
     /*
      * 数据库管理
      * */
@@ -235,6 +236,7 @@ signals:
     void sendLocationPos(QPointF);
     void doubleClicked(QPoint);
     void sendItemList(QList<QGraphicsItem *>);
+    void updateLayer();
 public slots:
     void viewChangedSlot();
     void newImage();
@@ -242,6 +244,7 @@ public slots:
     void updateLocationPos(QPointF world);
     void updateInfo(QPointF GPSPos , qreal speed, qreal dir, qreal altitude);//pos, speed, dir,altitude
     void updateSatellitesCount(int count);
+    void addGeoToScene(Geometry * g);
 };
 
 #endif // ILONG_H
