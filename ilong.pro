@@ -20,7 +20,6 @@ SOURCES += ILong.cpp \
     Manager.cpp \
     Layer.cpp \
     Geometry.cpp \
-    GeoMouse.cpp \
     GeoPie.cpp \
     GeoRect.cpp \
     GeoCircle.cpp \
@@ -37,7 +36,6 @@ HEADERS += ILong.h\
     Manager.h \
     Layer.h \
     Geometry.h \
-    GeoMouse.h \
     GeoPie.h \
     GeoRect.h \
     GeoCircle.h \

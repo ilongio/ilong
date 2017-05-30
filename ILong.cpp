@@ -43,28 +43,8 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
 //    resetMatrix();
 //    scale(1,1);
     QList <LayerFormat> fm;
-    fm.append(LayerFormat{"X",ILongNUMBER});
-    fm.append(LayerFormat{"Y",ILongNUMBER});
-    fm.append(LayerFormat{"VALUE",ILongNUMBER});
-    fm.append(LayerFormat{"NAME",ILongTEXT});
-    tempLayer = manager->addLayer("TempILong", &fm);
-//        QList<QPointF> mmm;
-//        mmm.append(QPointF(99.70875,27.82188));
-//        mmm.append(QPointF(99.70886,27.83168));
-//        mmm.append(QPointF(99.71169,27.85062));
-//        Geometry * g= new GeoPolygon(this,&mmm,false);
-//        QList<Geometry::ILongDataType> tt;
-//        Geometry::ILongDataType t;
-//        t.geometry = g;
-//        t.data.append(0);
-//        t.data.append(0);
-//        t.data.append(0);
-//        t.data.append("xxxx");
-//        tt.append(t);
-//        tempLayer->addItem(&tt);
-
-
-
+    fm << LayerFormat{"X",ILongNUMBER} << LayerFormat{"Y",ILongNUMBER} << LayerFormat{"VALUE",ILongNUMBER} << LayerFormat{"NAME",ILongTEXT};
+    tempLayer = manager->addLayer("iLongio", &fm);
 }
 
 ILong::~ILong()
@@ -148,6 +128,38 @@ void ILong::removeLayer(QString name)
 {
     manager->removeLayer(name);
 }
+
+void ILong::addTempGeo(QPointF world, ILongGeoType type)
+{
+    Geometry * g = nullptr;
+    switch (type) {
+    case iGeoCircle:
+        g = new GeoCircle(world);
+        break;
+    case iGeoRect:
+        g = new GeoRect(world);
+        break;
+    case iGeoPie:
+        g = new GeoPie(world);
+        break;
+    case iGeoStar:
+        g = new GeoStar(world);
+        break;
+    case iGeoTri:
+        g = new GeoTri(world);
+        break;
+    default:
+        break;
+    }
+    if(g)
+    {
+        Geometry::ILongDataType t;
+        t.geometry = g;
+        t.data << world.x() << world.y() << 0 << "iLong";
+        tempLayer->addGeo(t);
+        zoomTo(world,zoomLevel());
+    }
+}
 QPointF ILong::worldToScene(QPointF world)
 {
     world = ILoveChina::wgs84TOgcj02(world);
@@ -170,6 +182,11 @@ void ILong::setItemLimit(quint32 limit)
 quint32 ILong::getItemLimit()
 {
     return itemLimit;
+}
+
+void ILong::goToDefaultLocation()
+{
+    zoomTo(currentPos,zoomLevel());
 }
 
 
@@ -508,9 +525,9 @@ void ILong::updateInfo(QPointF GPSPos, qreal speed, qreal dir, qreal altitude)
 {
     Q_UNUSED(speed);
     GPSDir = dir;
-    tempLayer->addTempItem(iGeoMouse,GPSPos, dir);
     currentPos = GPSPos;
     GPSAltitude = altitude;
+    manager->addTempItem(GPSPos);
 }
 
 void ILong::updateSatellitesCount(int count)

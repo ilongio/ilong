@@ -38,13 +38,13 @@ typedef enum
     //点类图元
     iGeoCircle,  //点 圆
     iGeoRect,    //矩形
-    iGeoMouse,   //老鼠
     iGeoPie,     //扁形
     iGeoStar,    //星星
     iGeoTri,     //三角
     //面类图元
     iGeoPolygon
 } ILongGeoType;
+
 //保存图元的边界
 typedef struct
 {

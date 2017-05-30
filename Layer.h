@@ -44,11 +44,9 @@ public:
     ~Layer();
     QSqlQuery * searchInfo(QString field, QString text);
     void setViewToItem(QString itemID);
-    void addItem(QList<Geometry::ILongDataType> * dataList);
+    void addGeo(Geometry::ILongDataType data);
+    void addGeos(QList<Geometry::ILongDataType> * dataList);
     QList<Geometry *> *getItems();
-    void removeItem(Geometry *item);
-    void addTempItem(ILongGeoType type, QPointF world, quint32 dir = 0);
-    void updateTempItem(quint32 dir = 0);
     void updatLayer(bool * isUpdate);
     void setLabel(QString field = "ILONGNULL");
     /*
@@ -88,9 +86,7 @@ private:
      * */
     QList <LayerFormat> headType;
     QList <Geometry *> list;
-    Geometry * tempGeo;
-    QPointF tempGeoWorldPos;
-    ILongGeoType tempGeoType;
+
 signals:
     void addGeoToScene(Geometry *);
 public slots:

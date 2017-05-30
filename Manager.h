@@ -35,6 +35,7 @@ public:
     Layer *getLayerByID(QString id);
     void removeLayer(QString name);
     void stopUpdateLayer();
+    void addTempItem(QPointF world, ILongGeoType type = iGeoCircle);
 private:
     /*
      * 检查图层名称@name是否在图层管理表里,如果有,就自动在@name后面加*号,暂时这样处理导入多个同名图层
@@ -51,8 +52,11 @@ private:
     QList<Layer *> list;
     SQLExcute * sqlExcute;
     bool isUpdate;
-signals:
 
+    QPointF tempGeoWorldPos;
+    ILongGeoType tempGeoType;
+signals:
+    void addGeoToScene(Geometry *);
 public slots:
     void updatLayer();
 };

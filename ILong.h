@@ -20,7 +20,6 @@
 #include "Manager.h"
 #include "Layer.h"
 #include "GeoRect.h"
-#include "GeoMouse.h"
 #include "GeoPie.h"
 #include "GeoCircle.h"
 #include "GeoStar.h"
@@ -93,6 +92,7 @@ public:
      * 通过图层名称@name删除图层
      * */
     void removeLayer(QString name);
+    void addTempGeo(QPointF world, ILongGeoType type = iGeoCircle);
     /*
      * 世界坐标和场景坐标相与转换
      * */
@@ -103,6 +103,7 @@ public:
      * */
     void setItemLimit(quint32 limit = DEFAULTITEMLIMITPERLAYER);
     quint32 getItemLimit();
+    void goToDefaultLocation();
 
 protected:
     bool viewportEvent(QEvent *event);

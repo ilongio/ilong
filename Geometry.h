@@ -19,7 +19,6 @@ class ILONGSHARED_EXPORT Geometry : public QGraphicsObject
 {
     Q_OBJECT
 public:
-
     /*
      * 插入图元结构
      * */
@@ -28,7 +27,6 @@ public:
         Geometry * geometry;    //图元
         QList<QVariant> data;   //一行数据放到data列表里
     } ILongDataType;
-
     explicit Geometry(ILongGeoType gType,quint8 lWidth, QColor iPen, QColor iBrush);
     ILongGeoRect getRect();
     ILongGeoType getGeoType();

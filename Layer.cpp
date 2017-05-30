@@ -84,7 +84,14 @@ void Layer::setViewToItem(QString itemID)
     query = 0;
 }
 
-void Layer::addItem(QList<Geometry::ILongDataType> *dataList)
+void Layer::addGeo(Geometry::ILongDataType data)
+{
+    QList<Geometry::ILongDataType> l;
+    l.append(data);
+    addGeos(&l);
+}
+
+void Layer::addGeos(QList<Geometry::ILongDataType> *dataList)
 {
     sqlExcute->addItems(dataList,layerID, &headType);
 }
@@ -94,62 +101,10 @@ QList<Geometry *> * Layer::getItems()
     return &list;
 }
 
-void Layer::removeItem(Geometry *item)
-{
-    iLong->scene()->removeItem(item);
-}
-
-void Layer::addTempItem(ILongGeoType type, QPointF world, quint32 dir)
-{
-    tempGeoType = type;
-    tempGeoWorldPos = world;
-    updateTempItem(dir);
-}
-
-void Layer::updateTempItem(quint32 dir)
-{
-    if(tempGeo)
-    {
-        tempGeo->rotate(dir);
-        tempGeo->setPos(iLong->worldToScene(tempGeoWorldPos));
-        return;
-    }
-    switch (tempGeoType) {
-    case iGeoCircle:
-        tempGeo = new GeoRect(tempGeoWorldPos);
-        break;
-    case iGeoRect:
-        tempGeo = new GeoRect(tempGeoWorldPos);
-        break;
-    case iGeoPie:
-        tempGeo = new GeoPie(tempGeoWorldPos);
-        break;
-    case iGeoMouse:
-        tempGeo = new GeoMouse(tempGeoWorldPos);
-        break;
-    case iGeoStar:
-        tempGeo = new GeoStar(tempGeoWorldPos);
-        break;
-    case iGeoTri:
-        tempGeo = new GeoTri(tempGeoWorldPos);
-        break;
-    default:
-        break;
-    }
-    if(tempGeo)
-    {
-        tempGeo->setPos(iLong->worldToScene(tempGeoWorldPos));
-        tempGeo->setScale(iLong->itemScale);
-        tempGeo->rotate(dir);
-        //iLong->scene()->addItem(tempGeo);
-        emit addGeoToScene(tempGeo);
-    }
-}
 
 void Layer::updatLayer(bool *isUpdate)
 {
     list.clear();
-    tempGeo = nullptr;
     if(!*isUpdate)
         return;
     QPointF leftTop = iLong->sceneToWorld(iLong->mapToScene(QPoint(0,0)));
@@ -167,9 +122,6 @@ void Layer::updatLayer(bool *isUpdate)
             break;
         case iGeoRect:
             g = new GeoRect(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
-            break;
-        case iGeoMouse:
-            g = new GeoMouse(itemInfo.center);
             break;
         case iGeoPie:
             g = new GeoPie(itemInfo.center,itemInfo.size,itemInfo.dir,itemInfo.pen,itemInfo.brush);
@@ -209,7 +161,6 @@ void Layer::updatLayer(bool *isUpdate)
     }
     delete query;
     query = 0;
-    //updateTempItem();
 }
 
 void Layer::setLabel(QString field)

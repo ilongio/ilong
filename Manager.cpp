@@ -13,6 +13,7 @@ Manager::Manager(ILong *iL, QObject *parent) : QObject(parent),iLong(iL),sqlExcu
     }
     delete query;
     query = 0;
+    connect(this, SIGNAL(addGeoToScene(Geometry*)), iLong, SLOT(addGeoToScene(Geometry*)));
 }
 
 QList<Layer *> Manager::getLayers()
@@ -23,7 +24,7 @@ QList<Layer *> Manager::getLayers()
 Layer *Manager::addLayer(QString name, QList<LayerFormat> *typeList)
 {
     QString layerName = checkLayerName(name);
-    if(name == "TempILong" && layerName != name)
+    if(name == "iLongio" && layerName != name)
         return getLayer(name);
     Layer * layer  = new Layer(iLong, layerName, typeList);
     list.append(layer);
@@ -61,7 +62,7 @@ Layer *Manager::getLayerByID(QString id)
 void Manager::removeLayer(QString name)
 {
      Layer * l = getLayer(name);
-    if(name == "TempILong")
+    if(name == "iLongio")
     {
         if(l != nullptr)
             sqlExcute->clearLayer(l->getLayerID());
@@ -69,7 +70,7 @@ void Manager::removeLayer(QString name)
     }
     if(l != nullptr)
     {
-        if(name == "TempILong")
+        if(name == "iLongio")
             sqlExcute->clearLayer(l->getLayerID());
         else
         {
@@ -86,6 +87,41 @@ void Manager::stopUpdateLayer()
     iLong->scene()->clear();
 }
 
+void Manager::addTempItem(QPointF world, ILongGeoType type)
+{
+    qsrand(QDateTime::currentDateTime().time().second());
+    tempGeoType = type;
+    tempGeoWorldPos = world;
+    QColor pen = QColor(qrand()%255,qrand()%255,qrand()%255);
+    Geometry * g = nullptr;
+    switch (tempGeoType) {
+    case iGeoCircle:
+        g = new GeoCircle(tempGeoWorldPos,40,pen,pen);
+        break;
+    case iGeoRect:
+        g = new GeoRect(tempGeoWorldPos,40,pen,pen);
+        break;
+    case iGeoPie:
+        g = new GeoPie(tempGeoWorldPos,80,0,pen,pen);
+        break;
+    case iGeoStar:
+        g = new GeoStar(tempGeoWorldPos,40,pen,pen);
+        break;
+    case iGeoTri:
+        g = new GeoTri(tempGeoWorldPos,40,pen,pen);
+        break;
+    default:
+        break;
+    }
+    if(g)
+    {
+        g->setPos(iLong->worldToScene(tempGeoWorldPos));
+        g->setScale(iLong->itemScale);
+        //iLong->scene()->addItem(tempGeo);
+        emit addGeoToScene(g);
+    }
+}
+
 void Manager::updatLayer()
 {
     isUpdate = true;
@@ -97,7 +133,7 @@ void Manager::updatLayer()
             list.at(i)->updatLayer(&isUpdate);
         }
     }
-    //this->thread()->exit();
+    addTempItem(tempGeoWorldPos,tempGeoType);
 }
 
 QString Manager::checkLayerName(QString name)
