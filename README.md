@@ -23,3 +23,6 @@ delete t.geometry;
 //GeoPolygon图元用来支持多边形和线条，现在基本用不到，暂时这样设计
 //文字图元的话并不想加进去，如果真需要，可以放一个图元显示图元标就可以
 ```
+##### 截图
+
+![image](https://raw.githubusercontent.com/ilongio/ilong/e9c7bd65b4c838f4aea08cf3db7d562dc8ddc87c/Screenshot.png)
