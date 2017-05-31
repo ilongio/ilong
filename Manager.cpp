@@ -77,8 +77,8 @@ void Manager::removeLayer(QString name)
             list.removeOne(l);
             delete l;
         }
+        updatLayer();
     }
-
 }
 
 void Manager::stopUpdateLayer()

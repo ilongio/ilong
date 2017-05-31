@@ -242,9 +242,9 @@ QSqlQuery *SQLExcute::searchInfo(QString itemLayerID, QString field, ILongType f
 {
     QString sql;
     if(fieldType == ILongNUMBER)
-        sql = QString("SELECT * FROM '%1' WHERE %2 = %3").arg(itemLayerID).arg(field).arg(text);
+        sql = QString("SELECT ILONGID, %1 FROM '%2' WHERE %3 = %4").arg(field).arg(itemLayerID).arg(field).arg(text);
     else
-        sql = QString("SELECT * FROM '%1' WHERE %2 like '%%3%'").arg(itemLayerID).arg(field).arg(text);
+        sql = QString("SELECT ILONGID, %1 FROM '%2' WHERE %3 like '%%4%'").arg(field).arg(itemLayerID).arg(field).arg(text);
     return getResult(sql,"searchInfo");
 }
 
@@ -262,7 +262,10 @@ void SQLExcute::closeDB()
     else
       db = QSqlDatabase::addDatabase("QSQLITE");
     if(db.isOpen())
+    {
+        db.commit();
         db.close();
+    }
 }
 
 void SQLExcute::removeLayer(QString id)

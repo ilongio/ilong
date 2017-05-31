@@ -131,22 +131,25 @@ void ILong::removeLayer(QString name)
 
 void ILong::addTempGeo(QPointF world, ILongGeoType type)
 {
+
     Geometry * g = nullptr;
+    QColor pen = QColor(qrand()%255,qrand()%255,qrand()%255);
+    QColor brush = QColor(qrand()%255,qrand()%255,qrand()%255);
     switch (type) {
     case iGeoCircle:
-        g = new GeoCircle(world);
+        g = new GeoCircle(world,80,pen,brush);
         break;
     case iGeoRect:
-        g = new GeoRect(world);
+        g = new GeoRect(world,80,pen,brush);
         break;
     case iGeoPie:
-        g = new GeoPie(world);
+        g = new GeoPie(world,80,0,pen,brush);
         break;
     case iGeoStar:
-        g = new GeoStar(world);
+        g = new GeoStar(world,80,pen,brush);
         break;
     case iGeoTri:
-        g = new GeoTri(world);
+        g = new GeoTri(world,80,pen,brush);
         break;
     default:
         break;
@@ -158,6 +161,8 @@ void ILong::addTempGeo(QPointF world, ILongGeoType type)
         t.data << world.x() << world.y() << 0 << "iLong";
         tempLayer->addGeo(t);
         zoomTo(world,zoomLevel());
+        delete g;
+        g = nullptr;
     }
 }
 QPointF ILong::worldToScene(QPointF world)
@@ -300,36 +305,41 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     painter->save();
     painter->resetTransform();
     painter->setRenderHint(QPainter::Antialiasing);
+    painter->setPen(QColor(Qt::yellow));
+    QLabel lb;
+    QPoint p = viewport()->rect().center();
+    int line = distanceList.at( zoomLevel() ) / pow(2.0, MAXZOOMLEVEL-zoomLevel() ) / 0.597164;
+    int telta = ((viewport()->width() > viewport()->height() ? viewport()->width() : viewport()->height()) / 2) / line;
+    for(int i=0; i<=telta; i++)
+    {
+        painter->drawLine(QPoint(p.x()+i*line,p.y()-10),QPoint(p.x()+i*line,p.y()+10));
+        painter->drawLine(QPoint(p.x()-i*line,p.y()-10),QPoint(p.x()-i*line,p.y()+10));
+        painter->drawLine(QPoint(p.x()-10,p.y()+i*line),QPoint(p.x()+10,p.y()+i*line));
+        painter->drawLine(QPoint(p.x()-10,p.y()-i*line),QPoint(p.x()+10,p.y()-i*line));
+    }
     painter->setPen(QColor(Qt::green));
     painter->setBrush(QColor(Qt::green));
-    QPoint p = viewport()->rect().center();
-    painter->drawLine(p-QPoint(10,0), p+QPoint(10,0));
-    painter->drawLine(p-QPoint(0,10), p+QPoint(0,10));
     QFont font = painter->font();
     font.setBold(true);
     painter->setFont(font);
-    double line = distanceList.at( zoomLevel() ) / pow(2.0, MAXZOOMLEVEL-zoomLevel() ) / 0.597164;
-    QPoint p1(10,10);
-    QPoint p2((int)line,10);
-    QPoint p3(10,(int)line);
-    painter->drawLine(p1,p2);
-    painter->drawLine(p2,QPoint((int)line,15));
-    painter->drawLine(p1,p3);
-    painter->drawLine(QPoint(15,(int)line),p3);
-//    painter->drawLine(10,height()-15, 10,height()-25);
-//    painter->drawLine((int)line,height()-15, (int)line,height()-25);
     QString distance = QVariant( distanceList.at(zoomLevel())/1000 ).toString();
     painter->drawText(QPoint(10,height()-15), QString("(%1) %2km").arg(currentLevel).arg(distance));
-    QLabel lb;
     QString copyRight("iLong.io");
-    painter->drawText(QPoint((width()-lb.fontMetrics().width(copyRight))/2,height()-15),copyRight);
-    painter->translate(width()-12,10);
-    painter->rotate(90);
+    painter->drawText(QPoint((width()-lb.fontMetrics().width(copyRight)-15),height()-15),copyRight);
     QString north = currentPos.x() >= 0 ? "N" : "S";
     QString east = currentPos.y() >= 0 ? "E" : "W";
-    painter->drawText(QPoint(0,10),QString("%1%2 %3%4 A:%5 D:%6 T:%7 S:%8").arg(north)
+    painter->resetTransform();
+    painter->translate(width(),0);
+    painter->rotate(90);
+    painter->drawText(QPoint(15,10+lb.fontMetrics().height()),QString("%1%2 %3%4").arg(north)
                       .arg(fabs(currentPos.x()),0,'g',10).arg(east)
-                      .arg(fabs(currentPos.y()),0,'g',10).arg(GPSAltitude).arg(GPSDir).arg(tilesCount)
+                      .arg(fabs(currentPos.y()),0,'g',10));
+    painter->resetTransform();
+    painter->translate(15+lb.fontMetrics().height()/2,15);
+    painter->rotate(90);
+    //painter->translate(0,width()-15-lb.fontMetrics().height());
+    painter->drawText(QPoint(0,10),QString("A:%1 D:%2 T:%3 S:%4")
+                      .arg(GPSAltitude).arg(GPSDir).arg(tilesCount)
                       .arg(satellitesCount) );
     painter->restore();
 }
