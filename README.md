@@ -11,7 +11,7 @@ iLong->setDefaultLocation(QPointF(99.70875,27.82188),16);
 //创建图层
 QList <LayerFormat> format;
 format << LayerFormat{"VALUE1",ILongNUMBER} << LayerFormat{"VALUE2",ILongTEXT};
-Layer * layer = layer = iLong->addLayer(layerName, &format);
+Layer * layer = iLong->addLayer(layerName, &format);
 //添加图元
 Geometry::ILongDataType t;
 t.geometry = new GeoCircle(QPointF(99.70875,27.82188) /＊ ,80,pen,brush ＊/ );
