@@ -194,6 +194,11 @@ void ILong::goToDefaultLocation()
     zoomTo(currentPos,zoomLevel());
 }
 
+bool ILong::moveLayerTo(QString name, bool back)
+{
+    return manager->moveLayer(name, back);
+}
+
 
 bool ILong::viewportEvent(QEvent *event)
 {

@@ -104,6 +104,7 @@ public:
     void setItemLimit(quint32 limit = DEFAULTITEMLIMITPERLAYER);
     quint32 getItemLimit();
     void goToDefaultLocation();
+    bool moveLayerTo(QString name, bool back = false);
 
 protected:
     bool viewportEvent(QEvent *event);

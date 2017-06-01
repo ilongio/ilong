@@ -122,6 +122,27 @@ void Manager::addTempItem(QPointF world, ILongGeoType type)
     }
 }
 
+bool Manager::moveLayer(QString name, bool up)
+{
+    Layer * l = getLayer(name);
+    if(!l)
+        return false;
+    int index = list.indexOf(l);
+    if(up)
+    {
+        if(index == 0)
+            return false;
+        list.removeAt(index);
+        list.insert(index - 1, l);
+        return true;
+    }
+    if(index == list.size()+1)
+        return false;
+    list.removeAt(index);
+    list.insert(index + 1, l);
+    return true;
+}
+
 void Manager::updatLayer()
 {
     isUpdate = true;
