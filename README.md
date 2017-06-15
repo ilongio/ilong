@@ -5,7 +5,7 @@
 ```cpp
 #include <ilong.h>
 
-ILong * iLong new ILong(this);
+ILong * iLong = new ILong(this);
 //设置默认加载位置和地图等级
 iLong->setDefaultLocation(QPointF(99.70875,27.82188),16);
 //创建图层

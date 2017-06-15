@@ -7,6 +7,27 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     tilesCount(0),currentPos(DEFAULTLOCATION),itemLimit(DEFAULTITEMLIMITPERLAYER),
     satellitesCount(0),GPSAltitude(0),GPSDir(0)
 {
+    QSqlQuery * query = sqlExcute.getDefaultLoaction();
+    while (query->next())
+    {
+        QString fieldName = query->value(0).toString();
+        if(fieldName == "X")
+        {
+            defaultLocation.setX(query->value(1).toDouble());
+            currentPos.setX(query->value(1).toDouble());
+        }
+        if(fieldName == "Y")
+        {
+            defaultLocation.setY(query->value(1).toDouble());
+            currentPos.setY(query->value(1).toDouble());
+        }
+        if(fieldName == "LEVEL")
+        {
+            currentLevel = query->value(1).toInt();
+            numberOfTiles= tilesOnZoomLevel(currentLevel);
+        }
+    }
+    delete query;
     distanceList<<5000000<<2000000<<1000000<<1000000<<1000000<<100000<<100000<<50000<<50000<<10000<<10000<<10000<<1000<<1000<<500<<200<<100<<50<<25;
     setStyleSheet("background-color:rgb(236,236,236)");
     setScene(new QGraphicsScene(this));
@@ -99,7 +120,13 @@ void ILong::setDefaultLocation(QPointF worldCoordinate, quint8 zoomLevel)
         defaultLocation = worldCoordinate;
         currentLevel = zoomLevel;
     }
+    sqlExcute.updateDefaultLoaction(defaultLocation,currentLevel);
     zoomTo(defaultLocation,currentLevel);
+}
+
+QPointF ILong::getDefaultLocation()
+{
+    return defaultLocation;
 }
 
 QList<Layer *> ILong::getLayers() const
@@ -119,7 +146,7 @@ Layer *ILong::getLayerByID(QString ID) const
 
 Layer *ILong::addLayer(QString name, QList<LayerFormat> *typeList) const
 {
-    if(!typeList->size())
+    if(!typeList->size() || name.isEmpty())
         return nullptr;
     return manager->addLayer(name,typeList);
 }

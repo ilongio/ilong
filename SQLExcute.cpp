@@ -9,6 +9,8 @@ SQLExcute::SQLExcute(QObject *parent) : QObject(parent)
         dir.mkdir(CONFIGPATH);
     }
     db.setDatabaseName(CONFIGPATH + "ilong.io");
+    db.transaction();
+    db.commit();
     if(!db.open())
     {
         qDebug() << "Init SQLITE Open " << db.lastError().text();
@@ -18,6 +20,11 @@ SQLExcute::SQLExcute(QObject *parent) : QObject(parent)
     if(!query.exec(sql))
     {
         qDebug() << "CREATE TABLE ILONGIO " << query.lastError().text();
+    }
+    sql = "CREATE TABLE IF NOT EXISTS ILONGCONF(NAME TEXT PRIMARY KEY, VALUE INTEGER DEFAULT 0)";
+    if(!query.exec(sql))
+    {
+        qDebug() << "CREATE TABLE ILONGCONF " << query.lastError().text();
     }
 }
 
@@ -149,6 +156,7 @@ void SQLExcute::insertImage(int x, int y, int z, QByteArray ax)
             return;
         }
     }
+    db.transaction();
     QSqlQuery query(db);
     query.prepare("REPLACE INTO ILONGIO VALUES (?,?,?,?)");
     query.addBindValue(x);
@@ -159,6 +167,7 @@ void SQLExcute::insertImage(int x, int y, int z, QByteArray ax)
     {
         qDebug() << "insertImage query.exec() " << query.lastError().text();
     }
+    db.commit();
 }
 
 QSqlQuery *SQLExcute::initLayerManager()
@@ -252,6 +261,22 @@ QSqlQuery *SQLExcute::setViewToItem(QString layerID, QString itemID)
 {
     QString sql = QString("SELECT CenterX,CenterY FROM '%1INFO' WHERE ILONGID = '%2'").arg(layerID).arg(itemID);
     return getResult(sql,"setViewToItem");
+}
+
+QSqlQuery *SQLExcute::getDefaultLoaction()
+{
+    QString sql = "SELECT * FROM ILONGCONF";
+    return getResult(sql,"getDefaultLoaction");
+}
+
+void SQLExcute::updateDefaultLoaction(QPointF world, quint8 level)
+{
+    QString sql = QString("REPLACE INTO ILONGCONF VALUES ('X', %1)").arg(world.x());
+    nonResult(sql, "update x ");
+    sql = QString("REPLACE INTO ILONGCONF VALUES ('Y', %1)").arg(world.y());
+    nonResult(sql, "update y ");
+    sql = QString("REPLACE INTO ILONGCONF VALUES ('LEVEL', %1)").arg(level);
+    nonResult(sql, "update level ");
 }
 
 void SQLExcute::closeDB()
@@ -349,12 +374,14 @@ void SQLExcute::nonResult(QString sql, QString position)
             return;
         }
     }
+    db.transaction();
     QSqlQuery query(db);
     if(!query.exec(sql))
     {
         qDebug() << position << query.lastError().text();
         qDebug() << sql;
     }
+    db.commit();
 }
 
 

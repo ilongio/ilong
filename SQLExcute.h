@@ -53,6 +53,8 @@ public:
     QSqlQuery * getItemInfo(QString itemLayerID, QString itemID);
     QSqlQuery * searchInfo(QString itemLayerID, QString field, ILongType fieldType,QString text);
     QSqlQuery * setViewToItem(QString layerID,QString itemID);
+    QSqlQuery * getDefaultLoaction();
+    void updateDefaultLoaction(QPointF world = DEFAULTLOCATION, quint8 level = DEFAULTZOOMLEVEL);
     void closeDB();
     /*
      * 删除图层,@id可以通过图层获得

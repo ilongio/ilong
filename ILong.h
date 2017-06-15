@@ -43,7 +43,7 @@ public:
     friend class Network;
     friend class ItemInfo;
 
-    ILong(QWidget *parent);
+    ILong(QWidget *parent=0);
     ~ILong();
 
     /*****************************************************************************
@@ -76,6 +76,7 @@ public:
      * @zoomLevel       地图等级
      * */
     void setDefaultLocation(QPointF worldCoordinate, quint8 zoomLevel);
+    QPointF getDefaultLocation();
     /*
      * 返回所有图层
      * */
