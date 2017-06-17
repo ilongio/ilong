@@ -35,8 +35,8 @@ void GeoPie::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget 
     if(label.length())
     {
         QFont font = painter->font();
+        font.setFamily("Microsoft YaHei");
         font.setBold(true);
-        //font.setPixelSize(12);
         painter->setFont(font);
         painter->setPen(brush);
         painter->drawText(-getLabelPixeSize()/2,-size/2-5,label);

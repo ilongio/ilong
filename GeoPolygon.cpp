@@ -58,6 +58,7 @@ void GeoPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWid
     if(label.length())
     {
         QFont font = painter->font();
+        font.setFamily("Microsoft YaHei");
         font.setBold(true);
         painter->setFont(font);
         painter->setPen(brush);

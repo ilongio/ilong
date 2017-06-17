@@ -279,6 +279,12 @@ void SQLExcute::updateDefaultLoaction(QPointF world, quint8 level)
     nonResult(sql, "update level ");
 }
 
+void SQLExcute::updateItemLimit(quint32 limit)
+{
+    QString sql = QString("REPLACE INTO ILONGCONF VALUES ('LIMIT', %1)").arg(limit);
+    nonResult(sql, "update limit ");
+}
+
 void SQLExcute::closeDB()
 {
     QSqlDatabase db;

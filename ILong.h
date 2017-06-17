@@ -106,6 +106,7 @@ public:
     quint32 getItemLimit();
     void goToDefaultLocation();
     bool moveLayerTo(QString name, bool back = false);
+    void setViewOffset(int deltaX = 10, int deltaY = -10);
 
 protected:
     bool viewportEvent(QEvent *event);

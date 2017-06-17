@@ -39,6 +39,7 @@ void GeoStar::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget
     if(label.length())
     {
         QFont font = painter->font();
+        font.setFamily("Microsoft YaHei");
         font.setBold(true);
         painter->setFont(font);
         painter->setPen(brush);

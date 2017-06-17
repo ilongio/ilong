@@ -28,8 +28,8 @@ void GeoCircle::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidg
     if(label.length())
     {
         QFont font = painter->font();
+        font.setFamily("Microsoft YaHei");
         font.setBold(true);
-        //font.setPixelSize(12);
         painter->setFont(font);
         painter->setPen(brush);
         painter->drawText(-getLabelPixeSize()/2,size+5,label);

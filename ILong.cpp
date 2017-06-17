@@ -26,9 +26,14 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
             currentLevel = query->value(1).toInt();
             numberOfTiles= tilesOnZoomLevel(currentLevel);
         }
+        if(fieldName == "LIMIT")
+        {
+            itemLimit = query->value(1).toInt();
+        }
     }
     delete query;
-    distanceList<<5000000<<2000000<<1000000<<1000000<<1000000<<100000<<100000<<50000<<50000<<10000<<10000<<10000<<1000<<1000<<500<<200<<100<<50<<25;
+    //distanceList<<5000000<<2000000<<1000000<<1000000<<1000000<<100000<<100000<<50000<<50000<<10000<<10000<<10000<<1000<<1000<<500<<200<<100<<50<<20;
+    distanceList<<5000000<<2000000<<1000000<<500000<<200000<<100000<<50000<<20000<<10000<<5000<<2000<<1000<<500<<200<<100<<50<<20<<10<<5;
     setStyleSheet("background-color:rgb(236,236,236)");
     setScene(new QGraphicsScene(this));
     /*
@@ -209,6 +214,7 @@ QPointF ILong::sceneToWorld(QPointF scene)
 void ILong::setItemLimit(quint32 limit)
 {
     itemLimit = limit;
+    sqlExcute.updateItemLimit(limit);
 }
 
 quint32 ILong::getItemLimit()
@@ -224,6 +230,12 @@ void ILong::goToDefaultLocation()
 bool ILong::moveLayerTo(QString name, bool back)
 {
     return manager->moveLayer(name, back);
+}
+
+void ILong::setViewOffset(int deltaX, int deltaY)
+{
+    setSceneLocation(QPointF(sceneRect().x() + deltaX, sceneRect().y() + deltaY));
+    emit viewChangedSignal();
 }
 
 
@@ -337,24 +349,24 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     painter->save();
     painter->resetTransform();
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(QColor(Qt::yellow));
+    painter->setPen(QColor(Qt::green));
     QLabel lb;
     QPoint p = viewport()->rect().center();
-    int line = distanceList.at( zoomLevel() ) / pow(2.0, MAXZOOMLEVEL-zoomLevel() ) / 0.597164;
+    int line = distanceList.at( zoomLevel()-1) / pow(2.0, MAXZOOMLEVEL-zoomLevel() -1) / 0.597164;
     int telta = ((viewport()->width() > viewport()->height() ? viewport()->width() : viewport()->height()) / 2) / line;
     for(int i=0; i<=telta; i++)
     {
-        painter->drawLine(QPoint(p.x()+i*line,p.y()-10),QPoint(p.x()+i*line,p.y()+10));
-        painter->drawLine(QPoint(p.x()-i*line,p.y()-10),QPoint(p.x()-i*line,p.y()+10));
-        painter->drawLine(QPoint(p.x()-10,p.y()+i*line),QPoint(p.x()+10,p.y()+i*line));
-        painter->drawLine(QPoint(p.x()-10,p.y()-i*line),QPoint(p.x()+10,p.y()-i*line));
+        painter->drawLine(QPoint(p.x()+i*line,p.y()-5),QPoint(p.x()+i*line,p.y()+5));
+        painter->drawLine(QPoint(p.x()-i*line,p.y()-5),QPoint(p.x()-i*line,p.y()+5));
+        painter->drawLine(QPoint(p.x()-5,p.y()+i*line),QPoint(p.x()+5,p.y()+i*line));
+        painter->drawLine(QPoint(p.x()-5,p.y()-i*line),QPoint(p.x()+5,p.y()-i*line));
     }
-    painter->setPen(QColor(Qt::green));
+    //painter->setPen(QColor(Qt::green));
     painter->setBrush(QColor(Qt::green));
     QFont font = painter->font();
     font.setBold(true);
     painter->setFont(font);
-    QString distance = QVariant( distanceList.at(zoomLevel())/1000 ).toString();
+    QString distance = QVariant( distanceList.at(zoomLevel()-1)/1000 ).toString();
     painter->drawText(QPoint(10,height()-15), QString("(%1) %2km").arg(currentLevel).arg(distance));
     QString copyRight("iLong.io");
     painter->drawText(QPoint((width()-lb.fontMetrics().width(copyRight)-15),height()-15),copyRight);
@@ -386,11 +398,25 @@ void ILong::keyPressEvent(QKeyEvent *event)
 {
     //QMessageBox::information(this,"x",QString::number( event->key()));
     switch (event->key()) {
+    case Qt::Key_J:
     case Qt::Key_VolumeUp:
         zoomIn();
         break;
+    case Qt::Key_K:
     case Qt::Key_VolumeDown:
         zoomOut();
+        break;
+    case Qt::Key_W:
+        setViewOffset(0,-10);
+        break;
+    case Qt::Key_S:
+        setViewOffset(0,10);
+        break;
+    case Qt::Key_A:
+        setViewOffset(-10,0);
+        break;
+    case Qt::Key_D:
+        setViewOffset(10,0);
         break;
     default:
         break;

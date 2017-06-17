@@ -55,6 +55,7 @@ public:
     QSqlQuery * setViewToItem(QString layerID,QString itemID);
     QSqlQuery * getDefaultLoaction();
     void updateDefaultLoaction(QPointF world = DEFAULTLOCATION, quint8 level = DEFAULTZOOMLEVEL);
+    void updateItemLimit(quint32 limit);
     void closeDB();
     /*
      * 删除图层,@id可以通过图层获得
