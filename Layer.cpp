@@ -1,7 +1,7 @@
 #include "Layer.h"
 
 Layer::Layer(ILong *parent, QString name, QList<LayerFormat> *typeList) : iLong(parent),
-    layerLabel(name),visible(true),selectable(false),sqlExcute(&parent->sqlExcute)
+    layerLabel(name),visible(true),selectable(true),sqlExcute(&parent->sqlExcute)
 {
     /*
      * 这是直接创建新图层并写入数据库

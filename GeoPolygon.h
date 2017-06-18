@@ -5,8 +5,6 @@
 #include "Geometry.h"
 #include "ILong.h"
 
-class ILong;
-
 class ILONGSHARED_EXPORT GeoPolygon : public Geometry
 {
     Q_OBJECT
@@ -14,7 +12,7 @@ public:
     explicit GeoPolygon(ILong *iL, QList<QPointF> *pointList, bool closePath = false, quint8 lineWidth = 1, QColor pen = QColor(Qt::red), QColor brush = QColor(Qt::yellow));
 protected:
     QRectF boundingRect() const Q_DECL_OVERRIDE;
-    QPainterPath shape();
+    QPainterPath shape() const Q_DECL_OVERRIDE;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *) Q_DECL_OVERRIDE;
 signals:
 
@@ -23,6 +21,7 @@ private:
     ILong *iLong;
     bool needClosePath;
     int pHeight;
+    QPolygonF polygon;
 };
 
-#endif // GEOPOLYGON_H
+#endif // GEOCIRCLE_H

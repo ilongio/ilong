@@ -282,7 +282,7 @@ bool ILong::viewportEvent(QEvent *event)
                         continue;
                     }
                     Layer * layer = manager->getLayerByID(nameList.at(0));
-                    if(!layer->isSelectable() && g->getGeoType() == iGeoPolygon)
+                    if(!layer->isSelectable())
                         l.removeOne(l.at(i));
 
                 }

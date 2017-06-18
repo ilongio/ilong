@@ -4,21 +4,8 @@ GeoPolygon::GeoPolygon(ILong *iL, QList<QPointF> * pointList, bool closePath, qu
     Geometry(iGeoPolygon,lineWidth, pen, brush),iLong(iL)
 {
     closeFlag = closePath;
-    if(pointList->size() == 0)
-    {
-        list.append(QPointF(0,0));
-        list.append(QPointF(0,0));
-    }
-    else if(pointList->size() == 1)
-    {
-        list.append(pointList->at(0));
-        list.append(pointList->at(0));
-    }
-    else
-    {
         for(int i=0; i<pointList->size(); i++)
             list.append(pointList->at(i));
-    }
     checkRect();
     QPointF minPoint = iLong->worldToScene(QPointF(rect.minX,rect.minY));
     QPointF maxPoint = iLong->worldToScene(QPointF(rect.maxX,rect.maxY));
@@ -26,6 +13,12 @@ GeoPolygon::GeoPolygon(ILong *iL, QList<QPointF> * pointList, bool closePath, qu
     QLineF polygonHeight(QPointF(0,minPoint.y()),QPointF(0,maxPoint.y()));
     size = polygonWidth.length();
     pHeight = polygonHeight.length();
+    QPointF telta = iLong->worldToScene(getCenter()) - QPointF(size/2, pHeight/2);
+    for(int i=0; i<list.size(); i++)
+    {
+        polygon.append(iLong->worldToScene(list.at(i))-telta);
+        qDebug() << polygon.at(i);
+    }
 }
 
 QRectF GeoPolygon::boundingRect() const
@@ -33,28 +26,26 @@ QRectF GeoPolygon::boundingRect() const
     return QRectF(0, 0, size, pHeight);
 }
 
-QPainterPath GeoPolygon::shape()
+QPainterPath GeoPolygon::shape() const
 {
-    QPointF telta = iLong->worldToScene(getCenter()) - QPointF(size/2, pHeight/2);
     QPainterPath path;
-    QPolygonF polygon;
-    for(int i=0; i<list.size(); i++)
-        polygon.append(iLong->worldToScene(list.at(i))-telta);
-    path.addPolygon(polygon);
     if(closeFlag)
-        path.closeSubpath();
+        path.addPolygon(polygon);
     return path;
 }
 
 void GeoPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    //painter->drawRect(boundingRect());
     QPen xPen(QBrush(pen),lineWidth);
     painter->setPen(xPen);
     painter->setRenderHint(QPainter::Antialiasing);
     if(closeFlag)
         painter->setBrush(brush);
-    painter->drawPath(shape());
+    QPainterPath path;
+    path.addPolygon(polygon);
+    if(closeFlag)
+        path.closeSubpath();
+    painter->drawPath(path);
     if(label.length())
     {
         QFont font = painter->font();
