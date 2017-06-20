@@ -238,6 +238,38 @@ void ILong::setViewOffset(int deltaX, int deltaY)
     emit viewChangedSignal();
 }
 
+void ILong::DownloadTiles(quint8 dowloadMaxLevel)
+{
+    if(dowloadMaxLevel < currentLevel)
+        return;
+    //进来得先保存 左上角和右下角的世界坐标位置先
+    QPointF dowloadTilesTL = sceneToWorld(mapToScene(0,0));
+    QPointF dowloadTilesBR = sceneToWorld(mapToScene(viewport()->width(), viewport()->height()));
+    for(int level=currentLevel; level<=dowloadMaxLevel; level++)
+    {
+        QPointF sceneCenter = mapToScene(viewport()->rect().center());
+        QPointF leftTopDelta = sceneCenter - worldToScene(dowloadTilesTL);
+        QPointF rightBottomDelta = worldToScene(dowloadTilesBR) - sceneCenter;
+        QPoint dMid = QPoint(sceneCenter.x() / DEFAULTTILESIZE,sceneCenter.y() / DEFAULTTILESIZE);
+        QPoint dTL = QPoint(leftTopDelta.x() / DEFAULTTILESIZE + 1,leftTopDelta.y() / DEFAULTTILESIZE + 1);
+        int rightTiles = rightBottomDelta.x() / DEFAULTTILESIZE + 1;
+        int bottomTiles = rightBottomDelta.y() / DEFAULTTILESIZE + 1;
+        for(int x=-dTL.x()+dMid.x(); x<=rightTiles+dMid.x(); x++)
+        {
+            for(int y=-dTL.y()+dMid.y(); y<=bottomTiles+dMid.y(); y++)
+            {
+                if(map.isTileValid(x,y,currentLevel))
+                {
+                    QString path = map.queryTile(x, y, currentLevel);
+                    list.append(path);
+                }
+
+            }
+        }
+        zoomIn();
+    }
+}
+
 
 bool ILong::viewportEvent(QEvent *event)
 {
@@ -394,22 +426,28 @@ void ILong::keyPressEvent(QKeyEvent *event)
     //QMessageBox::information(this,"x",QString::number( event->key()));
     switch (event->key()) {
     case Qt::Key_J:
+    case Qt::Key_Z:
     case Qt::Key_VolumeUp:
         zoomIn();
         break;
     case Qt::Key_K:
+    case Qt::Key_X:
     case Qt::Key_VolumeDown:
         zoomOut();
         break;
+    case Qt::Key_Up:
     case Qt::Key_W:
         setViewOffset(0,-10);
         break;
+    case Qt::Key_Down:
     case Qt::Key_S:
         setViewOffset(0,10);
         break;
+    case Qt::Key_Left:
     case Qt::Key_A:
         setViewOffset(-10,0);
         break;
+    case Qt::Key_Right:
     case Qt::Key_D:
         setViewOffset(10,0);
         break;

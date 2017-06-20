@@ -78,7 +78,7 @@ public:
     void setDefaultLocation(QPointF worldCoordinate, quint8 zoomLevel);
     QPointF getDefaultLocation();
     /*
-     * 返回所有图层
+     * 返回图层
      * */
     QList<Layer *> getLayers() const;
     Layer * getlayer(QString name) const;
@@ -104,10 +104,23 @@ public:
      * */
     void setItemLimit(quint32 limit = DEFAULTITEMLIMITPERLAYER);
     quint32 getItemLimit();
+    /*
+     * 跳转到默认位置，可以通过setDefaultLocation设置位置，如果有GPS更新位置，默认位置为GPS当前位置
+     * */
     void goToDefaultLocation();
+    /*
+     * 上下图层了，好像是可以用的，不过我现在用不到
+     * */
     bool moveLayerTo(QString name, bool back = false);
+    /*
+     * 用来响应按键上下左右移动地图了。。。
+     * */
     void setViewOffset(int deltaX = 10, int deltaY = -10);
-
+    /*
+     * 下载离线瓦片到数据库中，下载只会从当前地图等级开始下载，下到指定的地图等级
+     * @dowloadMaxLevel >= 当前地图等级
+     * */
+    void DownloadTiles(quint8 dowloadMaxLevel = MAXZOOMLEVEL);
 protected:
     bool viewportEvent(QEvent *event);
     void drawBackground(QPainter *p, const QRectF &rect);
@@ -229,10 +242,13 @@ private:
      * */
     int satellitesCount;
     /*
-     * 如果有GPS数据 保存高度
+     * 如果有GPS数据 保存高度 和 方向， 速度现在暂时没有用
      * */
     qreal GPSAltitude;
     qreal GPSDir;
+    /*
+     * 保存比例
+     * */
     QList<double> distanceList;
 signals:
     void viewChangedSignal();
