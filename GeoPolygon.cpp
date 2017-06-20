@@ -15,10 +15,7 @@ GeoPolygon::GeoPolygon(ILong *iL, QList<QPointF> * pointList, bool closePath, qu
     pHeight = polygonHeight.length();
     QPointF telta = iLong->worldToScene(getCenter()) - QPointF(size/2, pHeight/2);
     for(int i=0; i<list.size(); i++)
-    {
         polygon.append(iLong->worldToScene(list.at(i))-telta);
-        qDebug() << polygon.at(i);
-    }
 }
 
 QRectF GeoPolygon::boundingRect() const
@@ -46,13 +43,15 @@ void GeoPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWid
     if(closeFlag)
         path.closeSubpath();
     painter->drawPath(path);
-    if(label.length())
+    //多段线就不应该显示标注
+    if((label.length() && closeFlag) ||
+            (label.length() && polygon.size() == 2 && !closeFlag))
     {
         QFont font = painter->font();
         font.setFamily("Microsoft YaHei");
         font.setBold(true);
         painter->setFont(font);
-        painter->setPen(brush);
+        painter->setPen(pen);
         painter->drawText((size-getLabelPixeSize())/2,pHeight/2,label);
 
     }

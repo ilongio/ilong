@@ -322,11 +322,6 @@ bool ILong::viewportEvent(QEvent *event)
         mouseMove = false;
         return true;
     }
-    case QEvent::GraphicsSceneMousePress:
-    {
-        qDebug() << event->type();
-        return true;
-    }
     default:
         break;
     }
