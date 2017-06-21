@@ -299,6 +299,17 @@ void SQLExcute::closeDB()
     }
 }
 
+QString SQLExcute::dbPath()
+{
+    return CONFIGPATH + "ilong.io";
+}
+
+QSqlQuery *SQLExcute::tilesCount()
+{
+    QString sql = "SELECT COUNT(*) FROM ILONGIO";
+    return getResult(sql,"tilesCount");
+}
+
 void SQLExcute::removeLayer(QString id)
 {
     QString sql = QString("DELETE FROM ILONGIOLAYER WHERE ID = '%1' ").arg(id);

@@ -121,6 +121,14 @@ public:
      * @dowloadMaxLevel >= 当前地图等级
      * */
     void DownloadTiles(quint8 dowloadMaxLevel = MAXZOOMLEVEL);
+    /*
+     * 取到数据库位置
+     * */
+    QString dbPath();
+    /*
+     * 查询瓦片数量
+     * */
+    int tilesSize();
 protected:
     bool viewportEvent(QEvent *event);
     void drawBackground(QPainter *p, const QRectF &rect);

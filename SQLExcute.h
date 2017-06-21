@@ -57,6 +57,8 @@ public:
     void updateDefaultLoaction(QPointF world = DEFAULTLOCATION, quint8 level = DEFAULTZOOMLEVEL);
     void updateItemLimit(quint32 limit);
     void closeDB();
+    QString dbPath();
+    QSqlQuery * tilesCount();
     /*
      * 删除图层,@id可以通过图层获得
      */

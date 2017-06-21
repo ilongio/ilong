@@ -242,6 +242,8 @@ void ILong::DownloadTiles(quint8 dowloadMaxLevel)
 {
     if(dowloadMaxLevel < currentLevel)
         return;
+    if(dowloadMaxLevel > MAXZOOMLEVEL)
+        dowloadMaxLevel = MAXZOOMLEVEL;
     //进来得先保存 左上角和右下角的世界坐标位置先
     QPointF dowloadTilesTL = sceneToWorld(mapToScene(0,0));
     QPointF dowloadTilesBR = sceneToWorld(mapToScene(viewport()->width(), viewport()->height()));
@@ -268,6 +270,21 @@ void ILong::DownloadTiles(quint8 dowloadMaxLevel)
         }
         zoomIn();
     }
+}
+
+QString ILong::dbPath()
+{
+    return sqlExcute.dbPath();
+}
+
+int ILong::tilesSize()
+{
+    QSqlQuery * query = sqlExcute.tilesCount();
+    int result = 0;
+    if(query->next())
+        result = query->value(0).toInt();
+    delete query;
+    return result;
 }
 
 
