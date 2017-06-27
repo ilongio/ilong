@@ -54,6 +54,7 @@ public:
     QSqlQuery * searchInfo(QString itemLayerID, QString field, ILongType fieldType,QString text);
     QSqlQuery * setViewToItem(QString layerID,QString itemID);
     QSqlQuery * getDefaultLoaction();
+    void updateGeoColor(QString layerId, quint32 geoID, QString field, QColor color);
     void updateDefaultLoaction(QPointF world = DEFAULTLOCATION, quint8 level = DEFAULTZOOMLEVEL);
     void updateItemLimit(quint32 limit);
     void closeDB();

@@ -88,7 +88,7 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
             continue;
         }
         /*
-         *现在再开始插入图元信息到信息表里 好像还不晚嘛
+         *创建信息表,专用保存图元的,应该可以直接保存图元,但是现在还不知道怎么弄,就先这样弄吧,以后再想办法改进(个人技术原因),主要信息有:
          * @ILONGID     与数据的ID关联;
          * @TYPE        ILongGeoType 枚举图元类型
          * @CenterX     图元wgs CenterX 坐标
@@ -99,21 +99,27 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
          * @MAXY        图元最大wgs Y坐标 (点类图元写CenterY相同) 设计两个坐标点只为了非点类图元需要计算边界问题,比如线
          * @LABEL       用来显示图标注的, 如果设置显示标注,就从数据表里面把标注内容填充到该字段
          * @INFO        保存图元GIS信息
-         *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-线宽-大小-画笔(R_G_B)-画刷(R_G_B)-旋转角度-闭环
-         *              线宽 闭环       只对面类图元有影响 闭环(如果true 就是多边行, false 就是多段线)
-         *              旋转角度 大小    只对点类图元有影响
+         *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN
+         * @FLAGS 点类旋转角度或面类图元闭环(FLAGS==0 线条， FLAGS!=0 多边形)
+         * @SIZE 多边形或线条线宽或点类图元大小
+         * ＠PEN 画笔(R_G_B)
+         * ＠BRUSH 画刷(R_G_B)
          *
         */
         QPointF cen = data.geometry->getCenter();
         ILongGeoRect rect = data.geometry->getRect();
-        QString info = QString("%1-%2-%3-%4-%5-%6-%7").arg(data.geometry->getPoints())
-                .arg(data.geometry->getLineWidth())
-                .arg(data.geometry->getSize()).arg(data.geometry->getPen()).arg(data.geometry->getBrush())
-                .arg(data.geometry->getDir()).arg(data.geometry->getCloseFlag());
-        sql = QString("INSERT INTO '%1INFO' VALUES ( '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', '%10', '%11' )")
+        sql = QString("INSERT INTO '%1INFO' VALUES ( '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', '%10', '%11', '%12', '%13', '%14', '%15')")
                 .arg(id).arg(data.geometry->getID()).arg(data.geometry->getGeoType()).arg(cen.x())
                 .arg(cen.y()).arg(rect.minX)
-                .arg(rect.minY).arg(rect.maxX).arg(rect.maxY).arg("ILONGNULL").arg(info);
+                .arg(rect.minY).arg(rect.maxX).arg(rect.maxY).arg("ILONGNULL")
+                //@INFO
+                .arg(data.geometry->getPoints())
+                //@FLAGS
+                .arg(data.geometry->getGeoType() == iGeoPolygon ? data.geometry->getCloseFlag():data.geometry->getDir())
+                //@SIZE
+                .arg(data.geometry->getGeoType() == iGeoPolygon ? data.geometry->getLineWidth():data.geometry->getSize())
+                //@PEN @BRUSH
+                .arg(data.geometry->getPen()).arg(data.geometry->getBrush());
         if(!query.exec(sql))
         {
             /*
@@ -231,13 +237,16 @@ void SQLExcute::initLayer(QString id, QString name, QList<LayerFormat> * typeLis
      * @MAXY        图元最大wgs Y坐标 (点类图元写CenterY相同) 设计两个坐标点只为了非点类图元需要计算边界问题,比如线
      * @LABEL       用来显示图标注的, 如果设置显示标注,就从数据表里面把标注内容填充到该字段
      * @INFO        保存图元GIS信息
-     *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN-线宽-大小-画笔(R_G_B)-画刷(R_G_B)-旋转角度-闭环
-     *              线宽 闭环       只对面类图元有影响 闭环(如果true 就是多边行, false 就是多段线)
-     *              旋转角度 大小    只对点类图元有影响
+     *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN
+     * @FLAGS 点类旋转角度或面类图元闭环(FLAGS==0 线条， FLAGS!=0 多边形)
+     * @SIZE 多边形或线条线宽或点类图元大小
+     * ＠PEN 画笔(R_G_B)
+     * ＠BRUSH 画刷(R_G_B)
      *
     */
     sql =QString("CREATE TABLE %1INFO (ILONGID REAL, TYPE REAL, CenterX REAL, CenterY REAL, "
-                 "MINX REAL, MINY REAL, MAXX REAL, MAXY REAL, LABEL TEXT, INFO TEXT)").arg(id);
+                 "MINX REAL, MINY REAL, MAXX REAL, MAXY REAL, LABEL TEXT, INFO TEXT, FLAGS REAL,"
+                 "SIZE REAL, PEN TEXT, BRUSH TEXT)").arg(id);
     nonResult(sql, "initLayer create info table ");
 }
 
@@ -267,6 +276,17 @@ QSqlQuery *SQLExcute::getDefaultLoaction()
 {
     QString sql = "SELECT * FROM ILONGCONF";
     return getResult(sql,"getDefaultLoaction");
+}
+
+void SQLExcute::updateGeoColor(QString layerId, quint32 geoID, QString field, QColor color)
+{
+    if(!(field=="PEN" || field=="BRUSH"))
+        return;
+    QString c = QString("%1_%2_%3").arg(color.red()).arg(color.green()).arg(color.blue());
+    QString sql = QString("UPDATE '%1INFO' SET '%2' = '%3' WHERE ILONGID = '%4'")
+            .arg(layerId).arg(field).arg(c).arg(geoID);
+    qDebug() << sql;
+    getResult(sql,"updateGeoColor");
 }
 
 void SQLExcute::updateDefaultLoaction(QPointF world, quint8 level)

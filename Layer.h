@@ -24,12 +24,10 @@ public:
         QPointF center;
         QString label;
         QList<QPointF> list;
-        int width;
         int size;
+        int flags;
         QColor pen;
         QColor brush;
-        int dir;
-        bool close;
     } ILongInfo;
     /*
      * 新增图层
@@ -49,6 +47,8 @@ public:
     QList<Geometry *> *getItems();
     void updatLayer(bool * isUpdate);
     void setLabel(QString field = "ILONGNULL");
+    void updateGeoPenColor(quint32 geoID, QColor c = QColor(Qt::red));
+    void updateGeoBrushColor(quint32 geoID, QColor c = QColor(Qt::yellow));
     /*
      * 返回图层名称
      * */

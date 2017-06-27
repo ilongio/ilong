@@ -124,7 +124,7 @@ void Layer::updatLayer(bool *isUpdate)
             g = new GeoRect(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
             break;
         case iGeoPie:
-            g = new GeoPie(itemInfo.center,itemInfo.size,itemInfo.dir,itemInfo.pen,itemInfo.brush);
+            g = new GeoPie(itemInfo.center,itemInfo.size,itemInfo.flags,itemInfo.pen,itemInfo.brush);
             break;
         case iGeoStar:
             g = new GeoStar(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
@@ -133,7 +133,7 @@ void Layer::updatLayer(bool *isUpdate)
             g = new GeoTri(itemInfo.center,itemInfo.size,itemInfo.pen,itemInfo.brush);
             break;
         case iGeoPolygon:
-            g = new GeoPolygon(iLong,&itemInfo.list,itemInfo.close,itemInfo.width,itemInfo.pen,itemInfo.brush);
+            g = new GeoPolygon(iLong,&itemInfo.list,itemInfo.flags,itemInfo.size,itemInfo.pen,itemInfo.brush);
             break;
         default:
             break;
@@ -149,7 +149,7 @@ void Layer::updatLayer(bool *isUpdate)
             {
                 g->setPos(iLong->worldToScene(itemInfo.center));
                 g->setScale(iLong->itemScale);
-                g->rotate(itemInfo.dir);
+                g->rotate(itemInfo.flags);
             }
             if(itemInfo.label != "ILONGNULL")
                 g->setLabel(itemInfo.label);
@@ -166,6 +166,16 @@ void Layer::updatLayer(bool *isUpdate)
 void Layer::setLabel(QString field)
 {
     sqlExcute->setLabel(layerID, field);
+}
+
+void Layer::updateGeoPenColor(quint32 geoID, QColor c)
+{
+    sqlExcute->updateGeoColor(this->getLayerID(),geoID,"PEN",c);
+}
+
+void Layer::updateGeoBrushColor(quint32 geoID, QColor c)
+{
+    sqlExcute->updateGeoColor(this->getLayerID(),geoID,"BRUSH",c);
 }
 
 
@@ -208,23 +218,36 @@ bool Layer::isSelectable()
 
 Layer::ILongInfo Layer::getInfo(QSqlQuery *query)
 {
+    /*
+     * 主要信息有:
+     * @ILONGID     与数据的ID关联;
+     * @TYPE        ILongGeoType 枚举图元类型
+     * @CenterX     图元wgs CenterX 坐标
+     * @CenterY     图元wgs CenterX 坐标
+     * @MINX        图元最小wgs X坐标 (点类图元写CenterX相同)
+     * @MINY        图元最小wgs X坐标 (点类图元写CenterY相同)
+     * @MAXX        图元最大wgs X坐标 (点类图元写CenterX相同)
+     * @MAXY        图元最大wgs Y坐标 (点类图元写CenterY相同) 设计两个坐标点只为了非点类图元需要计算边界问题,比如线
+     * @LABEL       用来显示图标注的, 如果设置显示标注,就从数据表里面把标注内容填充到该字段  默认 ILONGNULL
+     * @INFO        保存图元GIS信息
+     *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN
+     * @FLAGS 点类旋转角度或面类图元闭环(FLAGS==0 线条， FLAGS!=0 多边形)
+     * @SIZE 多边形或线条线宽或点类图元大小
+     * ＠PEN 画笔(R_G_B)
+     * ＠BRUSH 画刷(R_G_B)
+     *
+    */
     ILongInfo info;
     info.id = query->value(0).toDouble();
     info.center = QPointF(query->value(2).toDouble(),query->value(3).toDouble());
-    /*
-     * 默认 ILONGNULL
-     * */
     info.label =  query->value(8).toString();
-    QStringList gis = query->value(9).toString().split('-');
-    info.list = getGisList(gis.at(0));
-    info.width = gis.at(1).toInt();
-    info.size = gis.at(2).toInt();
-    QStringList iPen = gis.at(3).split('_');
+    info.list = getGisList(query->value(9).toString());
+    info.flags = query->value(10).toInt();
+    info.size = query->value(11).toInt();
+    QStringList iPen = query->value(12).toString().split('_');
     info.pen = QColor(iPen.at(0).toInt(),iPen.at(1).toInt(),iPen.at(2).toInt());
-    iPen = gis.at(4).split('_');
+    iPen = query->value(13).toString().split('_');
     info.brush = QColor(iPen.at(0).toInt(),iPen.at(1).toInt(),iPen.at(2).toInt());
-    info.dir = gis.at(5).toInt();
-    info.close = gis.at(6).toInt();
     return info;
 }
 

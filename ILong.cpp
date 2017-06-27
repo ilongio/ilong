@@ -69,7 +69,7 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
 //    resetMatrix();
 //    scale(1,1);
     QList <LayerFormat> fm;
-    fm << LayerFormat{"X",ILongNUMBER} << LayerFormat{"Y",ILongNUMBER} << LayerFormat{"VALUE",ILongNUMBER} << LayerFormat{"NAME",ILongTEXT};
+    fm << LayerFormat{"NAME",ILongTEXT} << LayerFormat{"VALUE",ILongNUMBER};
     tempLayer = manager->addLayer("iLongio", &fm);
 }
 
@@ -190,7 +190,7 @@ void ILong::addTempGeo(QPointF world, ILongGeoType type)
     {
         Geometry::ILongDataType t;
         t.geometry = g;
-        t.data << world.x() << world.y() << 0 << "iLong";
+        t.data << "iLong" << 0;
         tempLayer->addGeo(t);
         zoomTo(world,zoomLevel());
         delete g;
