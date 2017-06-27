@@ -23,6 +23,7 @@ public:
     explicit SQLExcute(QObject *parent = 0);
     void addItems(QList<Geometry::ILongDataType> *dataList,
                   QString id, QList<LayerFormat> *headType);
+    void removeItem(QString layerID, QString itemID);
     /*
      * 获取当前场景范围内的所有瓦片并返回QSqlQuery,用完了需要自己删除指针
      */

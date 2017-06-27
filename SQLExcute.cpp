@@ -140,6 +140,14 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
     db.transaction();
 }
 
+void SQLExcute::removeItem(QString layerID, QString itemID)
+{
+    QString sql = QString("DELETE FROM '%1' WHERE ILONGID = '%2' ").arg(layerID).arg(itemID);
+    nonResult(sql, "removeItem ");
+    sql = QString("DELETE FROM '%1INFO' WHERE ILONGID = '%2' ").arg(layerID).arg(itemID);
+    nonResult(sql, "removeItem at info");
+}
+
 QSqlQuery *SQLExcute::checkImage(int maxX, int minX, int maxY, int minY, int z)
 {
     QString sql = QString("SELECT * FROM ILONGIO WHERE X >= %1 and X <= %2 and Y <= %3 and Y >= %4 and Z = %5")

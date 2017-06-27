@@ -49,6 +49,7 @@ public:
     void setLabel(QString field = "ILONGNULL");
     void updateGeoPenColor(quint32 geoID, QColor c = QColor(Qt::red));
     void updateGeoBrushColor(quint32 geoID, QColor c = QColor(Qt::yellow));
+    void removeGeo(QString itemID);
     /*
      * 返回图层名称
      * */

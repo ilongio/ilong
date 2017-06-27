@@ -178,6 +178,11 @@ void Layer::updateGeoBrushColor(quint32 geoID, QColor c)
     sqlExcute->updateGeoColor(this->getLayerID(),geoID,"BRUSH",c);
 }
 
+void Layer::removeGeo(QString itemID)
+{
+    sqlExcute->removeItem(getLayerID(), itemID);
+}
+
 
 QString Layer::getLayerName()
 {
