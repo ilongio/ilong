@@ -67,7 +67,7 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
      * */
     connect(this,SIGNAL(sendLocationPos(QPointF)),this,SLOT(updateLocationPos(QPointF)));
 //    resetMatrix();
-//    scale(1,1);
+//    scale(0.5,0.5);
     QList <LayerFormat> fm;
     fm << LayerFormat{"NAME",ILongTEXT} << LayerFormat{"VALUE",ILongNUMBER};
     tempLayer = manager->addLayer("iLongio", &fm);

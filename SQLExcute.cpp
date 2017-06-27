@@ -285,8 +285,7 @@ void SQLExcute::updateGeoColor(QString layerId, quint32 geoID, QString field, QC
     QString c = QString("%1_%2_%3").arg(color.red()).arg(color.green()).arg(color.blue());
     QString sql = QString("UPDATE '%1INFO' SET '%2' = '%3' WHERE ILONGID = '%4'")
             .arg(layerId).arg(field).arg(c).arg(geoID);
-    qDebug() << sql;
-    getResult(sql,"updateGeoColor");
+    nonResult(sql,"updateGeoColor");
 }
 
 void SQLExcute::updateDefaultLoaction(QPointF world, quint8 level)
