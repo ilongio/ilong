@@ -5,7 +5,7 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     currentLevel(DEFAULTZOOMLEVEL),numberOfTiles(tilesOnZoomLevel(currentLevel)),
     defaultLocation(DEFAULTLOCATION),net(new Network(this)),
     tilesCount(0),currentPos(DEFAULTLOCATION),itemLimit(DEFAULTITEMLIMITPERLAYER),
-    satellitesCount(0),GPSAltitude(0),GPSDir(0)
+    satellitesCount(0),GPSAltitude(0),GPSDir(0),hasGps(false)
 {
     QSqlQuery * query = sqlExcute.getDefaultLoaction();
     while (query->next())
@@ -225,11 +225,6 @@ quint32 ILong::getItemLimit()
 void ILong::goToDefaultLocation()
 {
     zoomTo(defaultLocation,zoomLevel());
-}
-
-void ILong::saveViewPosition()
-{
-    sqlExcute.updateDefaultLoaction(centerPos,currentLevel);
 }
 
 bool ILong::moveLayerTo(QString name, bool back)
@@ -626,8 +621,9 @@ void ILong::viewChangedSlot()
     emit updateLayer();
     /*
      * 更新完视图，保存当前视图到数据库
+     * 本来要退出的时候再保存的，但是发在手机上没用
      * */
-     saveViewPosition();
+     sqlExcute.updateDefaultLoaction(centerPos,currentLevel);
 }
 
 void ILong::newImage()
@@ -650,6 +646,14 @@ void ILong::updateLocationPos(QPointF world)
 void ILong::updateInfo(QPointF GPSPos, qreal speed, qreal dir, qreal altitude)
 {
     Q_UNUSED(speed);
+    /*
+     * 如果有GPS,第一次更新应该要自己跳到GPS位置,不管地图是啥等级
+     * */
+    if(!hasGps)
+    {
+        hasGps = true;
+        zoomTo(GPSPos,zoomLevel());
+    }
     GPSDir = dir;
     currentPos = GPSPos;
     /*

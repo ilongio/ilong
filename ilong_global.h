@@ -20,7 +20,6 @@
 #define DEFAULTLOCATION QPointF(0,0)
 #define CONFIGPATH QDir::homePath() + "/.ilong.io/"
 
-
 typedef struct
 {
     int x;
