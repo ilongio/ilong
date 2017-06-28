@@ -75,6 +75,10 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
 
 ILong::~ILong()
 {
+    /*
+     * 关闭前先保存当前视图，如果有GPS就是保存GPS位置坐标，没有GPS保存当前界面中心点坐标
+     * */
+    sqlExcute.updateDefaultLoaction(centerPos,currentLevel);
     networkThread.exit(0);
     while(networkThread.isRunning())
         this->thread()->usleep(100);
@@ -224,7 +228,7 @@ quint32 ILong::getItemLimit()
 
 void ILong::goToDefaultLocation()
 {
-    zoomTo(currentPos,zoomLevel());
+    zoomTo(defaultLocation,zoomLevel());
 }
 
 bool ILong::moveLayerTo(QString name, bool back)
@@ -414,8 +418,8 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     painter->drawText(QPoint(10,height()-15), QString("(%1) %2km").arg(currentLevel).arg(distance));
     QString copyRight("iLong.io");
     painter->drawText(QPoint((width()-lb.fontMetrics().width(copyRight)-15),height()-15),copyRight);
-    QString north = currentPos.x() >= 0 ? "N" : "S";
-    QString east = currentPos.y() >= 0 ? "E" : "W";
+    QString north = centerPos.x() >= 0 ? "N" : "S";
+    QString east = centerPos.y() >= 0 ? "E" : "W";
     painter->resetTransform();
     painter->translate(width(),0);
     painter->rotate(90);
@@ -591,7 +595,7 @@ void ILong::zoomTo(QPointF world, quint8 zoomLevel, bool underMouse)
 void ILong::setSceneLocation(QPointF topLeftPos, bool updateItem)
 {
     setSceneRect(topLeftPos.x(),topLeftPos.y(),viewport()->width(), viewport()->height());
-    defaultLocation = sceneToWorld(mapToScene(viewport()->rect().center()));
+    centerPos = sceneToWorld(mapToScene(viewport()->rect().center()));
     if(updateItem)
         emit viewChangedSignal();
 }
@@ -614,7 +618,6 @@ void ILong::addGeoToScene(Geometry *g)
 
 void ILong::viewChangedSlot()
 {
-    //scene()->clear();
     manager->stopUpdateLayer();
     tilesUrlMatrix();
     if(!updateThread.isRunning())
@@ -644,6 +647,13 @@ void ILong::updateInfo(QPointF GPSPos, qreal speed, qreal dir, qreal altitude)
     Q_UNUSED(speed);
     GPSDir = dir;
     currentPos = GPSPos;
+    /*
+     * 因为如果有GPS的话界面打印出来的应该是GPS位置坐标，没有GPS就打印界面中心点位置坐标
+     * GPS位置要覆盖中心坐标，也覆盖默认位置坐标，在没有GPS设备上跳转到设置好的默认位置，有GPS就跳到GPS位置
+     * */
+    defaultLocation = GPSPos;
+    centerPos = GPSPos;
+
     GPSAltitude = altitude;
     manager->addTempItem(GPSPos);
 }

@@ -129,6 +129,7 @@ public:
      * 查询瓦片数量
      * */
     int tilesSize();
+    QPointF centerPos;
 protected:
     bool viewportEvent(QEvent *event);
     void drawBackground(QPainter *p, const QRectF &rect);
