@@ -109,6 +109,11 @@ public:
      * */
     void goToDefaultLocation();
     /*
+     * 保存视图位置，本来要是退出时保存视图位置的，但是发现在手机上没用，只有更新一次视图，
+     * 保存一次，下次打开时加载本次最后一次保存的位置
+     * */
+    void saveViewPosition();
+    /*
      * 上下图层了，好像是可以用的，不过我现在用不到
      * */
     bool moveLayerTo(QString name, bool back = false);
@@ -129,7 +134,6 @@ public:
      * 查询瓦片数量
      * */
     int tilesSize();
-    QPointF centerPos;
 protected:
     bool viewportEvent(QEvent *event);
     void drawBackground(QPainter *p, const QRectF &rect);
@@ -259,6 +263,10 @@ private:
      * 保存比例
      * */
     QList<double> distanceList;
+    /*
+     * 保存视图中心点，有GPS时保存GPS位置坐标
+     * */
+    QPointF centerPos;
 signals:
     void viewChangedSignal();
     void downloadImage();

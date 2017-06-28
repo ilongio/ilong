@@ -75,10 +75,6 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
 
 ILong::~ILong()
 {
-    /*
-     * 关闭前先保存当前视图，如果有GPS就是保存GPS位置坐标，没有GPS保存当前界面中心点坐标
-     * */
-    sqlExcute.updateDefaultLoaction(centerPos,currentLevel);
     networkThread.exit(0);
     while(networkThread.isRunning())
         this->thread()->usleep(100);
@@ -229,6 +225,11 @@ quint32 ILong::getItemLimit()
 void ILong::goToDefaultLocation()
 {
     zoomTo(defaultLocation,zoomLevel());
+}
+
+void ILong::saveViewPosition()
+{
+    sqlExcute.updateDefaultLoaction(centerPos,currentLevel);
 }
 
 bool ILong::moveLayerTo(QString name, bool back)
@@ -623,6 +624,10 @@ void ILong::viewChangedSlot()
     if(!updateThread.isRunning())
         updateThread.start();
     emit updateLayer();
+    /*
+     * 更新完视图，保存当前视图到数据库
+     * */
+     saveViewPosition();
 }
 
 void ILong::newImage()
