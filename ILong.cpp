@@ -51,7 +51,7 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     /*
      * 处理刷新信号
      * */
-    connect(this,SIGNAL(viewChangedSignal()),this,SLOT(viewChangedSlot()));
+    connect(this,SIGNAL(viewChangedSignal(bool)),this,SLOT(viewChangedSlot(bool)));
     net->moveToThread(&networkThread);
     /*
      * 处理下载信号
@@ -235,7 +235,7 @@ bool ILong::moveLayerTo(QString name, bool back)
 void ILong::setViewOffset(int deltaX, int deltaY)
 {
     setSceneLocation(QPointF(sceneRect().x() + deltaX, sceneRect().y() + deltaY));
-    emit viewChangedSignal();
+    emit viewChangedSignal(true);
 }
 
 void ILong::DownloadTiles(quint8 dowloadMaxLevel)
@@ -354,6 +354,12 @@ bool ILong::viewportEvent(QEvent *event)
             zoomOnPos = moveEvent->pos();
             mouseMove = true;
             moveEvent->accept();
+            if(backgroundPos.x()>=0 || backgroundPos.y()>=0
+                    || backgroundPos.x()+background.width()<=viewport()->width()
+                    || backgroundPos.y()+background.height()<=viewport()->height() )
+            {
+                emit viewChangedSignal(true);
+            }
         }
         return true;
     }
@@ -363,7 +369,7 @@ bool ILong::viewportEvent(QEvent *event)
         {
             if(releaseEvent->button() & Qt::LeftButton && zoomOnPos != QPoint(0,0) && mouseMove)
             {
-                emit viewChangedSignal();
+                emit viewChangedSignal(false);
                 zoomOnPos = QPoint(0,0);
                 releaseEvent->accept();
             }
@@ -546,11 +552,15 @@ void ILong::tilesUrlMatrix()
         //int z = query->value(2).toInt();
         QPixmap pm;
         pm.loadFromData(query->value(3).toByteArray());
-        QPainter painter(&background);
-        painter.drawPixmap((x+leftTop.x()-middle.x())*DEFAULTTILESIZE
-                           ,(y+leftTop.y()-middle.y())*DEFAULTTILESIZE
-                           ,DEFAULTTILESIZE,DEFAULTTILESIZE,pm);
-        painter.end();
+        if(painMutex.tryLock())
+        {
+            QPainter painter(&background);
+            painter.drawPixmap((x+leftTop.x()-middle.x())*DEFAULTTILESIZE
+                               ,(y+leftTop.y()-middle.y())*DEFAULTTILESIZE
+                               ,DEFAULTTILESIZE,DEFAULTTILESIZE,pm);
+            painter.end();
+            painMutex.unlock();
+        }
         tList.removeOne(QPoint(x,y));
     }
     if(query)
@@ -593,7 +603,7 @@ void ILong::setSceneLocation(QPointF topLeftPos, bool updateItem)
     setSceneRect(topLeftPos.x(),topLeftPos.y(),viewport()->width(), viewport()->height());
     centerPos = sceneToWorld(mapToScene(viewport()->rect().center()));
     if(updateItem)
-        emit viewChangedSignal();
+        emit viewChangedSignal(false);
 }
 
 bool ILong::checkZoomLevel(quint8 zoomLevel)
@@ -612,12 +622,14 @@ void ILong::addGeoToScene(Geometry *g)
         scene()->addItem(g);
 }
 
-void ILong::viewChangedSlot()
+void ILong::viewChangedSlot(bool onlyBackground)
 {
     manager->stopUpdateLayer();
     tilesUrlMatrix();
     if(!updateThread.isRunning())
         updateThread.start();
+    if(onlyBackground)
+        return;
     emit updateLayer();
     /*
      * 更新完视图，保存当前视图到数据库

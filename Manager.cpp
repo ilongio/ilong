@@ -155,6 +155,7 @@ void Manager::updatLayer()
         }
     }
     addTempItem(tempGeoWorldPos,tempGeoType);
+    this->thread()->exit();
 }
 
 QString Manager::checkLayerName(QString name)

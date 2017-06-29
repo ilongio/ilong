@@ -11,6 +11,7 @@
 #include <QThread>
 #include <QtMath>
 #include <QList>
+#include <QMutex>
 #include <QDebug>
 #include "ilong_global.h"
 #include "Map.h"
@@ -261,16 +262,20 @@ private:
      * 保存视图中心点，有GPS时保存GPS位置坐标
      * */
     QPointF centerPos;
+    /*
+     * 保存有没有GPS，默认没有GPS，如果有GPS，打开程序默认跳转到GPS位置
+     * */
     bool hasGps;
+    QMutex painMutex;
 signals:
-    void viewChangedSignal();
+    void viewChangedSignal(bool);
     void downloadImage();
     void sendLocationPos(QPointF);
     void doubleClicked(QPoint);
     void sendItemList(QList<QGraphicsItem *>);
     void updateLayer();
 public slots:
-    void viewChangedSlot();
+    void viewChangedSlot(bool onlyBackground);
     void newImage();
     void updateTilesCount(int count);
     void updateLocationPos(QPointF world);

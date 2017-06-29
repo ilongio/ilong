@@ -69,7 +69,7 @@ void Network::start()
         return;
     }
     isDownloading  = false;
-    //this->thread()->exit();
+    this->thread()->exit();
 }
 
 void Network::requestFinished(QNetworkReply *reply)
@@ -105,9 +105,13 @@ void Network::requestFinished(QNetworkReply *reply)
                 int y = (t.y+leftTop.y()-middle.y())*DEFAULTTILESIZE;
                 if(x>=0 && x<iLong->background.width() && y >=0 && y < iLong->background.height())
                 {
-                    QPainter p(&iLong->background);
-                    p.drawPixmap(x,y,DEFAULTTILESIZE,DEFAULTTILESIZE,pm);
-                    p.end();
+                    if(iLong->painMutex.tryLock())
+                    {
+                        QPainter p(&iLong->background);
+                        p.drawPixmap(x,y,DEFAULTTILESIZE,DEFAULTTILESIZE,pm);
+                        p.end();
+                        iLong->painMutex.unlock();
+                    }
                     emit newImage();
                 }
             }
