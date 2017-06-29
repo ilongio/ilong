@@ -354,12 +354,15 @@ bool ILong::viewportEvent(QEvent *event)
             zoomOnPos = moveEvent->pos();
             mouseMove = true;
             moveEvent->accept();
+            /*
+             * 这段码让托放变得很卡，理想是很美好的。。。。
             if(backgroundPos.x()>=0 || backgroundPos.y()>=0
                     || backgroundPos.x()+background.width()<=viewport()->width()
                     || backgroundPos.y()+background.height()<=viewport()->height() )
             {
                 emit viewChangedSignal(true);
             }
+            **/
         }
         return true;
     }
