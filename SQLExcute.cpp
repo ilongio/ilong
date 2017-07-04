@@ -379,6 +379,12 @@ void SQLExcute::setLabel(QString id, QString field)
     nonResult(sql, "setLabel " + id);
 }
 
+QSqlQuery *SQLExcute::getPosByItemID(QString layerID, QString itemID)
+{
+    QString sql = QString("SELECT CenterX,CenterY FROM '%1INFO' WHERE ILONGID = '%2'").arg(layerID).arg(itemID);
+    return getResult(sql,"getPosByItemID");
+}
+
 QSqlQuery *SQLExcute::getResult(QString sql, QString position)
 {
     QSqlDatabase db;

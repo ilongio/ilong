@@ -69,6 +69,7 @@ public:
      * */
     void setSelectable(bool b);
     bool isSelectable();
+    QPointF getItemPosByID(QString itemID);
 private:
     ILongInfo getInfo(QSqlQuery * query);
     QList<QPointF> getGisList(QString gis);

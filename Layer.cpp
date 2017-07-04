@@ -221,6 +221,17 @@ bool Layer::isSelectable()
     return selectable;
 }
 
+QPointF Layer::getItemPosByID(QString itemID)
+{
+    QSqlQuery * query  = sqlExcute->getPosByItemID(getLayerID(),itemID);
+    if(query->next())
+    {
+        return QPointF(query->value(0).toDouble(),query->value(1).toDouble());
+    }
+    return QPointF(0,0);
+    delete query;
+}
+
 Layer::ILongInfo Layer::getInfo(QSqlQuery *query)
 {
     /*

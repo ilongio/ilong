@@ -287,6 +287,16 @@ int ILong::tilesSize()
     return result;
 }
 
+bool ILong::GPSUE()
+{
+    return hasGps;
+}
+
+QPointF ILong::currentGPS()
+{
+    return hasGps ? GPSLocation : centerPos;
+}
+
 
 bool ILong::viewportEvent(QEvent *event)
 {
@@ -671,6 +681,7 @@ void ILong::updateInfo(QPointF GPSPos, qreal speed, qreal dir, qreal altitude)
     }
     GPSDir = dir;
     currentPos = GPSPos;
+    GPSLocation = GPSPos;
     /*
      * 因为如果有GPS的话界面打印出来的应该是GPS位置坐标，没有GPS就打印界面中心点位置坐标
      * GPS位置要覆盖中心坐标，也覆盖默认位置坐标，在没有GPS设备上跳转到设置好的默认位置，有GPS就跳到GPS位置

@@ -129,6 +129,11 @@ public:
      * 查询瓦片数量
      * */
     int tilesSize();
+    /*
+     * 是不是GPS设备
+     * */
+    bool GPSUE();
+    QPointF currentGPS();
 protected:
     bool viewportEvent(QEvent *event);
     void drawBackground(QPainter *p, const QRectF &rect);
@@ -266,6 +271,7 @@ private:
      * 保存有没有GPS，默认没有GPS，如果有GPS，打开程序默认跳转到GPS位置
      * */
     bool hasGps;
+    QPointF GPSLocation;
     QMutex painMutex;
 signals:
     void viewChangedSignal(bool);

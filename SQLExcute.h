@@ -75,6 +75,7 @@ public:
      */
     void setLayerSelectable(QString id,bool b);
     void setLabel(QString id,QString field);
+    QSqlQuery * getPosByItemID(QString layerID, QString itemID);
 private:
     /*
      * 通用执行有返回结果的@sql语句
