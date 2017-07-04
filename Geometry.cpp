@@ -51,7 +51,8 @@ QString Geometry::getPoints()
     for(int i=0; i<list.size(); i++)
     {
         QPointF p = list.at(i);
-        result += QString("%1,%2_").arg(p.x()).arg(p.y());
+        result += QString("%1,%2_").arg(QString::number(p.x(),'g',10))
+                .arg(QString::number(p.y(),'g',10));
     }
     return result.left(result.length()-1);
 }

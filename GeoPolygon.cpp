@@ -4,16 +4,14 @@ GeoPolygon::GeoPolygon(ILong *iL, QList<QPointF> * pointList, bool closePath, qu
     Geometry(iGeoPolygon,lineWidth, pen, brush),iLong(iL)
 {
     closeFlag = closePath;
-        for(int i=0; i<pointList->size(); i++)
-            list.append(pointList->at(i));
+    for(int i=0; i<pointList->size(); i++)
+        list.append(pointList->at(i));
     checkRect();
-    QPointF minPoint = iLong->worldToScene(QPointF(rect.minX,rect.minY));
-    QPointF maxPoint = iLong->worldToScene(QPointF(rect.maxX,rect.maxY));
-    QLineF polygonWidth(QPointF(minPoint.x(),0),QPointF(maxPoint.x(),0));
-    QLineF polygonHeight(QPointF(0,minPoint.y()),QPointF(0,maxPoint.y()));
-    size = polygonWidth.length();
-    pHeight = polygonHeight.length();
-    QPointF telta = iLong->worldToScene(getCenter()) - QPointF(size/2, pHeight/2);
+    QPointF tl = iLong->worldToScene(QPointF(rect.minX,rect.minY));
+    QPointF br = iLong->worldToScene(QPointF(rect.maxX,rect.maxY));
+    size = fabs(tl.x()-br.x());//polygonWidth.length();
+    pHeight = fabs(tl.y()-br.y());//polygonHeight.length();
+    QPointF telta = iLong->worldToScene(QPointF(rect.minX,rect.maxY));
     for(int i=0; i<list.size(); i++)
         polygon.append(iLong->worldToScene(list.at(i))-telta);
 }

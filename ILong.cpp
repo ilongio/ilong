@@ -71,6 +71,13 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     QList <LayerFormat> fm;
     fm << LayerFormat{"NAME",ILongTEXT} << LayerFormat{"VALUE",ILongNUMBER};
     tempLayer = manager->addLayer("iLongio", &fm);
+//    QList<QPointF> l;
+//    l.append(QPointF(99.7319,27.8306));
+//    l.append(QPointF(99.0115,27.6178));
+//    Geometry::ILongDataType tttt;
+//    tttt.geometry = new GeoPolygon(this,&l);
+//    tttt.data<<"xxx"<<0;
+//    tempLayer->addGeo(tttt);
 }
 
 ILong::~ILong()

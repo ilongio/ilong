@@ -99,7 +99,7 @@ void SQLExcute::addItems(QList<Geometry::ILongDataType> *dataList,
          * @MAXY        图元最大wgs Y坐标 (点类图元写CenterY相同) 设计两个坐标点只为了非点类图元需要计算边界问题,比如线
          * @LABEL       用来显示图标注的, 如果设置显示标注,就从数据表里面把标注内容填充到该字段
          * @INFO        保存图元GIS信息
-         *              格式: WGSx1,WGSy1_WGSx2,WGSy2_..._WGSxN,WGSyN
+         *              格式: WGSx1,WGSy1_WGSx2,WGSy2_.o.._WGSxN,WGSyN
          * @FLAGS 点类旋转角度或面类图元闭环(FLAGS==0 线条， FLAGS!=0 多边形)
          * @SIZE 多边形或线条线宽或点类图元大小
          * ＠PEN 画笔(R_G_B)

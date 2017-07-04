@@ -20,8 +20,8 @@ public slots:
 private:
     ILong *iLong;
     bool needClosePath;
-    int pHeight;
     QPolygonF polygon;
+    int pHeight;
 };
 
 #endif // GEOCIRCLE_H

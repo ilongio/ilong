@@ -49,7 +49,7 @@ protected:
     ILongGeoType geoType;
     QColor pen, brush;
     quint8 lineWidth;
-    quint8 size;
+    int size;
     ILongGeoRect rect;
     quint32 itemID;
     QString label;
