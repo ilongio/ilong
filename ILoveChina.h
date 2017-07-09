@@ -11,7 +11,7 @@
  * 说白了就是用来把WGS坐标和火星坐标(gcj)相互调教的,可以不用理它
  * */
 
-class ILoveChina
+class ILONGSHARED_EXPORT ILoveChina
 {
 public:
     ILoveChina();

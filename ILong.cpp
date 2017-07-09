@@ -5,7 +5,7 @@ ILong::ILong(QWidget *parent) : QGraphicsView(parent),itemScale(1),
     currentLevel(DEFAULTZOOMLEVEL),numberOfTiles(tilesOnZoomLevel(currentLevel)),
     defaultLocation(DEFAULTLOCATION),net(new Network(this)),
     tilesCount(0),currentPos(DEFAULTLOCATION),itemLimit(DEFAULTITEMLIMITPERLAYER),
-    satellitesCount(0),GPSAltitude(0),GPSDir(0),hasGps(false)
+    satellitesCount(0),GPSAltitude(0),GPSDir(0),hasGps(false),GPSSpeed(0)
 {
     QSqlQuery * query = sqlExcute.getDefaultLoaction();
     while (query->next())
@@ -304,6 +304,11 @@ QPointF ILong::currentGPS()
     return hasGps ? GPSLocation : centerPos;
 }
 
+void ILong::updateMap()
+{
+    emit viewChangedSignal(false);
+}
+
 
 bool ILong::viewportEvent(QEvent *event)
 {
@@ -436,8 +441,17 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     QFont font = painter->font();
     font.setBold(true);
     painter->setFont(font);
-    QString distance = QVariant( distanceList.at(zoomLevel()-1)/1000 ).toString();
-    painter->drawText(QPoint(10,height()-15), QString("(%1) %2km").arg(currentLevel).arg(distance));
+    QString distance = QVariant( distanceList.at(zoomLevel()-1) / 1000).toString();
+    for(int i=1; i<=maxZoomLevel(); i++)
+    {
+        if(i == zoomLevel())
+        {
+            painter->setPen(QColor(Qt::red));
+            painter->drawText(QPoint(30,height()-5*i-5), QString("%1km").arg(distance));
+        }
+        painter->drawLine(QPoint(10,height()-5*i-10),QPoint(20,height()-5*i-10));
+        painter->setPen(QColor(Qt::green));
+    }
     QString copyRight("iLong.io");
     painter->drawText(QPoint((width()-lb.fontMetrics().width(copyRight)-15),height()-15),copyRight);
     QString north = centerPos.x() >= 0 ? "N" : "S";
@@ -452,9 +466,9 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     painter->translate(15+lb.fontMetrics().height()/2,15);
     painter->rotate(90);
     //painter->translate(0,width()-15-lb.fontMetrics().height());
-    painter->drawText(QPoint(0,10),QString("A:%1 D:%2 T:%3 S:%4")
+    painter->drawText(QPoint(0,10),QString("A:%1 D:%2 T:%3 L:%4 S:%5")
                       .arg(GPSAltitude).arg(GPSDir).arg(tilesCount)
-                      .arg(satellitesCount) );
+                      .arg(satellitesCount).arg(GPSSpeed) );
     painter->restore();
 }
 
@@ -517,15 +531,16 @@ int ILong::tilesOnZoomLevel(quint8 zoomLevel)
 
 void ILong::tilesUrlMatrix()
 {
+    quint8 offset = 3;
     QPointF sceneCenter = mapToScene(viewport()->rect().center());
     QPointF leftTopDelta = sceneCenter - mapToScene(QPoint(0,0));
     QPointF rightBottomDelta = mapToScene(QPoint(viewport()->width(),viewport()->height())) - sceneCenter;
     middle = QPoint(sceneCenter.x() / DEFAULTTILESIZE,sceneCenter.y() / DEFAULTTILESIZE);
-    leftTop = QPoint(leftTopDelta.x() / DEFAULTTILESIZE + 1,leftTopDelta.y() / DEFAULTTILESIZE + 1);
-    int rightTiles = rightBottomDelta.x() / DEFAULTTILESIZE + 1;
-    int bottomTiles = rightBottomDelta.y() / DEFAULTTILESIZE + 1;
-    background = QPixmap((leftTop.x() + rightTiles + 1) * DEFAULTTILESIZE,
-                         (leftTop.y() + bottomTiles + 1) * DEFAULTTILESIZE);
+    leftTop = QPoint(leftTopDelta.x() / DEFAULTTILESIZE + offset,leftTopDelta.y() / DEFAULTTILESIZE + offset);
+    int rightTiles = rightBottomDelta.x() / DEFAULTTILESIZE + offset;
+    int bottomTiles = rightBottomDelta.y() / DEFAULTTILESIZE + offset;
+    background = QPixmap((leftTop.x() + rightTiles + offset) * DEFAULTTILESIZE,
+                         (leftTop.y() + bottomTiles + offset) * DEFAULTTILESIZE);
     background.fill(QColor::fromRgb(236,236,236));
     backgroundPos = mapFromScene((-leftTop.x()+middle.x())*DEFAULTTILESIZE,
                                  (-leftTop.y()+middle.y())*DEFAULTTILESIZE);
@@ -677,7 +692,7 @@ void ILong::updateLocationPos(QPointF world)
 
 void ILong::updateInfo(QPointF GPSPos, qreal speed, qreal dir, qreal altitude)
 {
-    Q_UNUSED(speed);
+    GPSSpeed = speed;
     /*
      * 如果有GPS,第一次更新应该要自己跳到GPS位置,不管地图是啥等级
      * */

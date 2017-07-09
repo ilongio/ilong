@@ -133,7 +133,14 @@ public:
      * 是不是GPS设备
      * */
     bool GPSUE();
+    /*
+     * 当前GPS位置
+     * */
     QPointF currentGPS();
+    /*
+     * 提供从外部更新地图函数调用
+     * */
+    void updateMap();
 protected:
     bool viewportEvent(QEvent *event);
     void drawBackground(QPainter *p, const QRectF &rect);
@@ -273,6 +280,7 @@ private:
     bool hasGps;
     QPointF GPSLocation;
     QMutex painMutex;
+    double GPSSpeed;
 signals:
     void viewChangedSignal(bool);
     void downloadImage();
