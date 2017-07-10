@@ -429,29 +429,26 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     QPoint p = viewport()->rect().center();
     int line = distanceList.at( zoomLevel()-1) / pow(2.0, MAXZOOMLEVEL-zoomLevel() -1) / 0.597164;
     int telta = ((viewport()->width() > viewport()->height() ? viewport()->width() : viewport()->height()) / 2) / line;
-    for(int i=0; i<=telta; i++)
+    for(int i=0; i<telta; i++)
     {
+        painter->setPen(QColor( i%2 ? Qt::red : Qt::green));
         painter->drawLine(QPoint(p.x()+i*line,p.y()-5),QPoint(p.x()+i*line,p.y()+5));
         painter->drawLine(QPoint(p.x()-i*line,p.y()-5),QPoint(p.x()-i*line,p.y()+5));
         painter->drawLine(QPoint(p.x()-5,p.y()+i*line),QPoint(p.x()+5,p.y()+i*line));
         painter->drawLine(QPoint(p.x()-5,p.y()-i*line),QPoint(p.x()+5,p.y()-i*line));
     }
-    //painter->setPen(QColor(Qt::green));
-    painter->setBrush(QColor(Qt::green));
     QFont font = painter->font();
     font.setBold(true);
     painter->setFont(font);
-    QString distance = QVariant( distanceList.at(zoomLevel()-1) / 1000).toString();
     for(int i=1; i<=maxZoomLevel(); i++)
     {
-        if(i == zoomLevel())
-        {
-            painter->setPen(QColor(Qt::red));
-            painter->drawText(QPoint(30,height()-5*i-5), QString("%1km").arg(distance));
-        }
-        painter->drawLine(QPoint(10,height()-5*i-10),QPoint(20,height()-5*i-10));
-        painter->setPen(QColor(Qt::green));
+        painter->setPen(QColor(i == zoomLevel() ? Qt::red : Qt::green));
+        painter->drawLine(QPoint(width()/2 - ((maxZoomLevel()/2+1)*5) + i*5,height()-15),
+                          QPoint(width()/2 - ((maxZoomLevel()/2+1)*5) + i*5,height()-25));
     }
+    painter->setPen(QColor(Qt::green));
+    QString distance = QVariant( distanceList.at(zoomLevel()-1) / 1000).toString();
+    painter->drawText(QPoint(10,height()-15), QString("%1km").arg(distance));
     QString copyRight("iLong.io");
     painter->drawText(QPoint((width()-lb.fontMetrics().width(copyRight)-15),height()-15),copyRight);
     QString north = centerPos.x() >= 0 ? "N" : "S";
@@ -468,7 +465,7 @@ void ILong::drawForeground(QPainter *painter, const QRectF &rect)
     //painter->translate(0,width()-15-lb.fontMetrics().height());
     painter->drawText(QPoint(0,10),QString("A:%1 D:%2 T:%3 L:%4 S:%5")
                       .arg(GPSAltitude).arg(GPSDir).arg(tilesCount)
-                      .arg(satellitesCount).arg(GPSSpeed) );
+                      .arg(satellitesCount).arg(QString::number(GPSSpeed,'g',2)) );
     painter->restore();
 }
 
@@ -531,7 +528,7 @@ int ILong::tilesOnZoomLevel(quint8 zoomLevel)
 
 void ILong::tilesUrlMatrix()
 {
-    quint8 offset = 3;
+    quint8 offset = 1;
     QPointF sceneCenter = mapToScene(viewport()->rect().center());
     QPointF leftTopDelta = sceneCenter - mapToScene(QPoint(0,0));
     QPointF rightBottomDelta = mapToScene(QPoint(viewport()->width(),viewport()->height())) - sceneCenter;
